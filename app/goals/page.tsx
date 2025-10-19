@@ -182,11 +182,11 @@ export default function GoalsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 pb-20">
+    <div className="max-w-6xl mx-auto px-4 py-6 pb-20">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Goals</h1>
-        <p className="text-gray-600">Set and achieve your life goals with Islamic guidance</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-3">Goals</h1>
+        <p className="text-gray-600 text-lg">Set and achieve your life goals with Islamic guidance</p>
       </div>
 
       {/* Tabs */}
@@ -217,45 +217,47 @@ export default function GoalsPage() {
 
       {/* Mobile Stats Cards */}
       <div className="grid grid-cols-2 gap-4 mb-8 md:hidden">
-        <div className="bg-white rounded-xl p-4 border border-gray-100">
-          <div className="text-2xl font-bold text-green-600">{totalCompletedGoals}</div>
-          <div className="text-sm text-gray-600">Completed</div>
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100 shadow-sm">
+          <div className="text-2xl font-bold text-green-600 mb-1">{totalCompletedGoals}</div>
+          <div className="text-sm text-gray-600 font-medium">Completed</div>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-100">
-          <div className="text-2xl font-bold text-green-600">{totalActiveGoals}</div>
-          <div className="text-sm text-gray-600">Active</div>
+        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-100 shadow-sm">
+          <div className="text-2xl font-bold text-blue-600 mb-1">{totalActiveGoals}</div>
+          <div className="text-sm text-gray-600 font-medium">Active</div>
         </div>
       </div>
 
       {/* Desktop Two-Column Layout */}
-      <div className="hidden md:grid md:grid-cols-3 md:gap-8 mb-8">
+      <div className="hidden md:grid md:grid-cols-4 md:gap-8 mb-8">
         {/* Left Sidebar - Stats & Categories */}
         <div className="space-y-6">
           {/* Desktop Stats Cards */}
           <div className="space-y-4">
-
-            <div className="bg-white rounded-xl p-4 border border-gray-100">
-              <div className="text-2xl font-bold text-green-600">{totalCompletedGoals}</div>
-              <div className="text-sm text-gray-600">Completed Goals</div>
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100 shadow-sm">
+              <div className="text-3xl font-bold text-green-600 mb-1">{totalCompletedGoals}</div>
+              <div className="text-sm text-gray-600 font-medium">Completed Goals</div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-100">
-              <div className="text-2xl font-bold text-green-600">{totalActiveGoals}</div>
-              <div className="text-sm text-gray-600">Active Goals</div>
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100 shadow-sm">
+              <div className="text-3xl font-bold text-blue-600 mb-1">{totalActiveGoals}</div>
+              <div className="text-sm text-gray-600 font-medium">Active Goals</div>
             </div>
           </div>
 
           {/* Goals by Category */}
           {(totalActiveGoals + totalCompletedGoals) > 0 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800">📋 Filter by Category</h3>
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <span>📋</span>
+                Filter by Category
+              </h3>
               
               {/* All Goals Filter */}
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`w-full text-left rounded-xl p-4 border transition-all duration-200 cursor-pointer ${
                   activeFilter === 'all' 
-                    ? 'bg-gray-100 border-gray-300 text-gray-800 shadow-sm' 
-                    : 'bg-white hover:bg-gray-50 border-gray-100 text-gray-800'
+                    ? 'bg-gradient-to-r from-gray-100 to-gray-50 border-gray-300 text-gray-800 shadow-sm' 
+                    : 'bg-white hover:bg-gray-50 border-gray-100 text-gray-800 hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -308,7 +310,7 @@ export default function GoalsPage() {
         </div>
 
         {/* Right Content - Goals List */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-3">
           <DashboardCard 
             title={
               <div className="flex items-center gap-2">
@@ -363,8 +365,8 @@ export default function GoalsPage() {
               onClick={() => setActiveFilter('all')}
               className={`w-full text-left rounded-xl p-4 border transition-all duration-200 cursor-pointer mb-4 ${
                 activeFilter === 'all' 
-                  ? 'bg-gray-100 border-gray-300 text-gray-800 shadow-sm' 
-                  : 'bg-white hover:bg-gray-50 border-gray-100 text-gray-800'
+                  ? 'bg-gradient-to-r from-gray-100 to-gray-50 border-gray-300 text-gray-800 shadow-sm' 
+                  : 'bg-white hover:bg-gray-50 border-gray-100 text-gray-800 hover:shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between">

@@ -157,9 +157,14 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
       {/* Add Goal Button */}
       <button
         onClick={() => setShowAddForm(!showAddForm)}
-        className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-green-400 hover:text-green-600 transition-colors"
+        className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-green-400 hover:text-green-600 hover:bg-green-50 transition-all duration-200 font-medium"
       >
-        + Add New Goal
+        <div className="flex items-center justify-center gap-2">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add New Goal
+        </div>
       </button>
 
       {/* Add Goal Form */}
@@ -169,7 +174,7 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           onSubmit={handleSubmit}
-          className="bg-gray-50 p-4 rounded-lg space-y-3"
+          className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl space-y-4 border border-gray-200"
         >
           <input
             type="text"
@@ -259,15 +264,15 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
             transition={{ delay: index * 0.1 }}
             className={`p-6 rounded-xl border-2 transition-all duration-200 ${
               goal.completed 
-                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 shadow-md' 
+                ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 shadow-md' 
                 : 'bg-white border-gray-200 hover:border-green-300 hover:shadow-lg shadow-sm'
             } ${
               highlightedGoalId === goal.id 
-                ? 'ring-2 ring-green-400 ring-opacity-50 shadow-xl border-green-400 bg-green-50' 
+                ? 'ring-2 ring-green-400 ring-opacity-50 shadow-xl border-green-400 bg-gradient-to-br from-green-50 to-emerald-50' 
                 : ''
             } ${
               newlyCreatedGoalId === goal.id 
-                ? 'ring-2 ring-blue-400 ring-opacity-50 shadow-xl border-blue-400 bg-blue-50' 
+                ? 'ring-2 ring-blue-400 ring-opacity-50 shadow-xl border-blue-400 bg-gradient-to-br from-blue-50 to-cyan-50' 
                 : ''
             }`}
           >
@@ -398,7 +403,7 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 min-w-[120px]">
                   <button
                     onClick={() => setSelectedGoal(selectedGoal === goal.id ? null : goal.id)}
                     className={`p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 ${
@@ -457,9 +462,12 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
                   newlyCreatedGoalId === goal.id ? 'bg-blue-50 rounded-lg p-4 border border-blue-200' : ''
                 }`}
               >
-                <div className="mb-3 flex items-center gap-2">
+                <div 
+                  className="mb-3 flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                  onClick={() => setSelectedGoal(null)}
+                >
                   <span className="text-lg">📖</span>
-                  <h5 className="font-semibold text-gray-800">
+                  <h5 className="font-semibold text-gray-800 flex-1">
                     Islamic Guidance for Your Goal
                     {newlyCreatedGoalId === goal.id && (
                       <span className="ml-2 text-sm font-normal text-blue-600">
@@ -467,6 +475,7 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
                       </span>
                     )}
                   </h5>
+                  <span className="text-gray-400 text-sm">Click to close</span>
                 </div>
                 <SmartGuidance 
                   goalTitle={goal.title}
