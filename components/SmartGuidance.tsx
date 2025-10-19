@@ -294,55 +294,6 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
               >
 
 
-                {/* Practical Steps */}
-                {match.practicalSteps && match.practicalSteps.length > 0 && (
-                  <div className="bg-white rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-green-700 mb-3">Practical Steps:</h4>
-                    <ul className="space-y-2">
-                      {match.practicalSteps.map((step, stepIndex) => (
-                        <li key={stepIndex} className="text-sm text-gray-700 flex items-start gap-2">
-                          <span className="text-green-500 mt-1">•</span>
-                          <span>{step}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Dua Recommendation */}
-                {match.duaRecommendation && (
-                  <div className="bg-white rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-green-700 mb-2">Recommended Dua:</h4>
-                    <p className="text-sm text-gray-700 italic bg-gray-50 p-3 rounded">
-                      {match.duaRecommendation}
-                    </p>
-                  </div>
-                )}
-
-                {/* Related Habits */}
-                {match.relatedHabits && match.relatedHabits.length > 0 && (
-                  <div className="bg-white rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-green-700 mb-3">Related Habits:</h4>
-                    <ul className="space-y-2">
-                      {match.relatedHabits.map((habit, habitIndex) => (
-                        <li key={habitIndex} className="text-sm text-gray-700 flex items-start gap-2">
-                          <span className="text-green-500 mt-1">•</span>
-                          <span>{habit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Life Application */}
-                {match.verse.life_application && (
-                  <div className="bg-white rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-green-700 mb-2">Life Application:</h4>
-                    <p className="text-sm text-gray-700">
-                      {match.verse.life_application}
-                    </p>
-                  </div>
-                )}
               </motion.div>
             )}
 
