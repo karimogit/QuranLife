@@ -702,11 +702,56 @@ class QuranEngine {
     const goalWords = this.extractKeywords(goal);
     const verseWords = this.extractKeywords(verse.text_en + ' ' + verse.reflection);
     
-    const matches = goalWords.filter(word => 
+    // Calculate exact matches
+    const exactMatches = goalWords.filter(word => 
+      verseWords.some(vw => vw === word)
+    );
+    
+    // Calculate partial matches
+    const partialMatches = goalWords.filter(word => 
       verseWords.some(vw => vw.includes(word) || word.includes(vw))
     );
     
-    return Math.min(0.95, matches.length / Math.max(goalWords.length, 1));
+    // Calculate semantic matches (related words)
+    const semanticMatches = this.calculateSemanticMatches(goalWords, verseWords);
+    
+    // Weight the different types of matches
+    const exactScore = exactMatches.length * 1.0;
+    const partialScore = (partialMatches.length - exactMatches.length) * 0.7;
+    const semanticScore = semanticMatches * 0.5;
+    
+    const totalMatches = exactScore + partialScore + semanticScore;
+    const maxPossibleScore = goalWords.length * 1.0;
+    
+    return Math.min(0.95, totalMatches / Math.max(maxPossibleScore, 1));
+  }
+  
+  private calculateSemanticMatches(goalWords: string[], verseWords: string[]): number {
+    // Define semantic relationships
+    const semanticMap: Record<string, string[]> = {
+      'fitness': ['strength', 'power', 'ability', 'body', 'strive', 'effort'],
+      'health': ['healing', 'cure', 'wellness', 'body', 'care', 'blessing'],
+      'prayer': ['worship', 'salah', 'remembrance', 'dhikr', 'establish'],
+      'family': ['children', 'parents', 'mercy', 'compassion', 'love'],
+      'success': ['achievement', 'blessing', 'prosper', 'victory', 'triumph'],
+      'patience': ['endure', 'persevere', 'steadfast', 'resilient'],
+      'study': ['knowledge', 'wisdom', 'learn', 'understand', 'reflect'],
+      'work': ['effort', 'strive', 'provision', 'sustenance', 'blessing']
+    };
+    
+    let semanticMatches = 0;
+    
+    for (const goalWord of goalWords) {
+      const relatedWords = semanticMap[goalWord] || [];
+      for (const relatedWord of relatedWords) {
+        if (verseWords.some(vw => vw.includes(relatedWord) || relatedWord.includes(vw))) {
+          semanticMatches++;
+          break; // Count each goal word only once
+        }
+      }
+    }
+    
+    return semanticMatches;
   }
 
   private generatePracticalSteps(theme: string, goal: string): string[] {
@@ -741,7 +786,7 @@ class QuranEngine {
     
     // 2. Key goal words (remove common words)
     const keyWords = keywords.filter(word => 
-      !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'do', 'get', 'make', 'have', 'be', 'is', 'are', 'was', 'were', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'must', 'shall'].includes(word)
+      !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'do', 'get', 'make', 'have', 'be', 'is', 'are', 'was', 'were', 'will', 'would', 'could', 'should', 'can', 'may', 'might', 'must', 'shall', 'a', 'an'].includes(word)
     );
     
     if (keyWords.length > 0) {
@@ -753,27 +798,35 @@ class QuranEngine {
       // 4. Key words with theme
       queries.push(`${keyWords.slice(0, 3).join(' ')} ${theme}`);
       queries.push(`${keyWords.slice(0, 2).join(' ')} ${theme}`);
+      
+      // 5. Individual key words for broader matching
+      keyWords.slice(0, 3).forEach(word => {
+        queries.push(word);
+        queries.push(`${word} ${theme}`);
+      });
     }
     
-    // 5. Theme-specific search terms (multiple variations)
+    // 6. Theme-specific search terms (multiple variations)
     const themeTerms = this.getThemeSearchTerms(theme);
     if (themeTerms && themeTerms !== 'guidance wisdom') {
       queries.push(themeTerms);
       // Add individual theme terms for better matching
       const individualTerms = themeTerms.split(' ').slice(0, 3);
       queries.push(individualTerms.join(' '));
+      individualTerms.forEach(term => queries.push(term));
     }
     
-    // 6. Goal-specific theme terms
+    // 7. Goal-specific theme terms
     const goalSpecificTerms = this.getGoalSpecificTerms(goal, theme);
     if (goalSpecificTerms) {
       queries.push(goalSpecificTerms);
       // Add individual terms from goal-specific terms
       const individualGoalTerms = goalSpecificTerms.split(' ').slice(0, 3);
       queries.push(individualGoalTerms.join(' '));
+      individualGoalTerms.forEach(term => queries.push(term));
     }
     
-    // 7. Add some variety with different guidance terms
+    // 8. Add some variety with different guidance terms
     const guidanceVariations = [
       'guidance wisdom help',
       'guidance success',
@@ -781,12 +834,30 @@ class QuranEngine {
       'guidance patience',
       'guidance prayer',
       'guidance family',
-      'guidance health'
+      'guidance health',
+      'guidance believer',
+      'guidance righteous',
+      'guidance mercy'
     ];
     
     // Pick a random guidance variation for variety
     const randomGuidance = guidanceVariations[Math.floor(Math.random() * guidanceVariations.length)];
     queries.push(randomGuidance);
+    
+    // 9. Add category-specific guidance
+    if (theme === 'fitness' || theme === 'health') {
+      queries.push('body strength health care trust');
+      queries.push('strive effort persevere');
+    } else if (theme === 'prayer') {
+      queries.push('prayer worship establish salah');
+      queries.push('remembrance dhikr');
+    } else if (theme === 'family') {
+      queries.push('family children parents');
+      queries.push('mercy compassion love');
+    } else if (theme === 'success') {
+      queries.push('success achievement blessing');
+      queries.push('prosper triumph victory');
+    }
     
     // Remove duplicates and empty queries
     const filteredQueries = queries.filter(q => q && q.trim().length > 0);
