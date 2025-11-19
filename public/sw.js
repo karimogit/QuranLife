@@ -10,7 +10,6 @@ const STATIC_CACHE = 'quranlife-static-v1';
 // Assets to cache for offline use
 const CACHE_ASSETS = [
   '/',
-  '/goals',
   '/habits', 
   '/settings',
   '/privacy',
