@@ -32,7 +32,7 @@ export default function NotFound() {
           <p className="text-xs text-gray-500">Quran 65:3</p>
         </div>
 
-        <div className="space-y-3">
+          <div className="space-y-3">
           <Link 
             href="/"
             className="block w-full py-3 px-6 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
@@ -46,12 +46,12 @@ export default function NotFound() {
             >
               View Habits
             </Link>
-            <Link 
-              href="/goals"
-              className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
-            >
-              View Goals
-            </Link>
+              <Link 
+                href="/"
+                className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+              >
+                Goals Dashboard
+              </Link>
           </div>
         </div>
 
