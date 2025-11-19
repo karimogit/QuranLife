@@ -157,13 +157,15 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
       {/* Add Goal Button */}
       <button
         onClick={() => setShowAddForm(!showAddForm)}
-        className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-green-400 hover:text-green-600 hover:bg-green-50 transition-all duration-200 font-medium"
+        className="group w-full p-5 border-2 border-dashed border-gray-300 rounded-2xl text-gray-600 hover:border-emerald-500 hover:text-emerald-700 hover:bg-emerald-50/50 transition-all duration-300 font-semibold shadow-sm hover:shadow-md"
       >
-        <div className="flex items-center justify-center gap-2">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add New Goal
+        <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </div>
+          <span className="text-base">Add New Goal</span>
         </div>
       </button>
 
@@ -236,17 +238,22 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
               <option value="high">High Priority</option>
             </select>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               type="submit"
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+              className="flex-1 px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all duration-200 font-semibold shadow-sm hover:shadow-md"
             >
-              Add Goal
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Add Goal
+              </span>
             </button>
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+              className="px-6 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-medium shadow-sm"
             >
               Cancel
             </button>
@@ -334,17 +341,22 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
                     <option value="high">High Priority</option>
                   </select>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     type="submit"
-                    className="px-3 py-1 bg-green-500 text-white text-sm rounded-md hover:bg-green-600 transition-colors"
+                    className="flex-1 px-5 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
-                    Save
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Save Changes
+                    </span>
                   </button>
                   <button
                     type="button"
                     onClick={handleEditCancel}
-                    className="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-400 transition-colors"
+                    className="px-5 py-2 bg-white border-2 border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
                   >
                     Cancel
                   </button>
@@ -403,48 +415,50 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-2 min-w-[120px]">
+                <div className="flex flex-col gap-2 min-w-[100px]">
                   <button
                     onClick={() => setSelectedGoal(selectedGoal === goal.id ? null : goal.id)}
-                    className={`p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 ${
-                      selectedGoal === goal.id ? 'bg-green-50 text-green-600' : ''
+                    className={`group p-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md ${
+                      selectedGoal === goal.id 
+                        ? 'bg-emerald-500 text-white' 
+                        : 'bg-white border-2 border-gray-200 text-gray-500 hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50'
                     }`}
                     title={selectedGoal === goal.id ? "Hide Islamic guidance" : "Show Islamic guidance"}
                   >
                     {selectedGoal === goal.id ? (
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 mx-auto" fill="currentColor" viewBox="0 0 24 24">
                         <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                       </svg>
                     )}
                   </button>
                   <button
                     onClick={() => handleQuickAddHabitForGoal(goal)}
-                    className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all duration-200"
+                    className="group p-2.5 bg-white border-2 border-gray-200 text-gray-500 rounded-xl hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md"
                     title="Add a recurring habit for this goal"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
                   </button>
                   <button
                     onClick={() => handleEditStart(goal)}
-                    className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all duration-200"
+                    className="group p-2.5 bg-white border-2 border-gray-200 text-gray-500 rounded-xl hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50 transition-all duration-200 shadow-sm hover:shadow-md"
                     title="Edit goal"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
                   <button
                     onClick={() => handleRemove(goal.id)}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                    className="group p-2.5 bg-white border-2 border-gray-200 text-gray-500 rounded-xl hover:border-red-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200 shadow-sm hover:shadow-md"
                     title="Delete goal"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>
