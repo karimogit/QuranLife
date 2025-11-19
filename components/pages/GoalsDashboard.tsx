@@ -231,7 +231,7 @@ export default function GoalsDashboard() {
         <div className="relative z-10 space-y-8 p-6 md:p-10">
           <div className="space-y-3">
             <p className="text-sm uppercase tracking-[0.3em] text-white/70">
-              Goals Dashboard
+              Goals
             </p>
             <h1 className="text-3xl font-bold md:text-4xl">
               Align your intentions with meaningful action

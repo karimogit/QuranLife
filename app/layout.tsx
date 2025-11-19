@@ -180,7 +180,7 @@ export default function RootLayout({
                 
                   <nav className="flex space-x-8">
                     <Link href="/" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
-                      Dashboard
+                      Home
                     </Link>
                     <Link href="/settings" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
                       Settings
@@ -209,11 +209,11 @@ export default function RootLayout({
               
               {/* Mobile Navigation */}
                 <div className="flex justify-around">
-                  <Link href="/" className="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-green-600 transition-colors" aria-label="Go to Dashboard">
+                  <Link href="/" className="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-green-600 transition-colors" aria-label="Go to Home">
                     <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
-                    <span className="text-xs">Dashboard</span>
+                    <span className="text-xs">Home</span>
                   </Link>
                   <Link href="/settings" className="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-green-600 transition-colors" aria-label="Go to Settings">
                     <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -255,7 +255,7 @@ export default function RootLayout({
                   <h4 className="text-md font-semibold text-gray-800 mb-4">Quick Links</h4>
                     <div className="space-y-2">
                       <Link href="/" className="block text-sm text-gray-600 hover:text-green-600 transition-colors">
-                        Dashboard
+                        Home
                       </Link>
                       <Link href="/settings" className="block text-sm text-gray-600 hover:text-green-600 transition-colors">
                         Settings
