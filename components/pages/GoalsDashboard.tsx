@@ -366,7 +366,7 @@ export default function GoalsDashboard() {
                           : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200 hover:text-emerald-700'
                       }`}
                     >
-                      {filter.id === 'all' ? 'All' : `${filter.emoji} ${filter.label}`}
+                      {filter.id === 'all' ? 'All' : `${'emoji' in filter ? filter.emoji + ' ' : ''}${filter.label}`}
                     </button>
                   );
                 })}
