@@ -1,5 +1,5 @@
 import GoalsDashboard from '@/components/pages/GoalsDashboard';
 
-export default function DashboardPage() {
+export default function HomePage() {
   return <GoalsDashboard />;
 }

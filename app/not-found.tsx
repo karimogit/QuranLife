@@ -37,7 +37,7 @@ export default function NotFound() {
             href="/"
             className="block w-full py-3 px-6 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
           >
-            Return to Dashboard
+            Return to Home
           </Link>
           <div className="flex gap-3">
             <Link 
@@ -50,7 +50,7 @@ export default function NotFound() {
                 href="/"
                 className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
               >
-                Goals Dashboard
+                Goals
               </Link>
           </div>
         </div>
