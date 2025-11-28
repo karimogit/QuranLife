@@ -19,7 +19,7 @@ interface Goal {
 interface GoalsListProps {
   goals: Goal[];
   onToggleGoal: (goalId: string) => void;
-  onAddGoal: (goal: Omit<Goal, 'id'>) => void;
+  onAddGoal: (goal: Omit<Goal, 'id'>) => string;
   onEditGoal: (goalId: string, updatedGoal: Omit<Goal, 'id'>) => void;
   onRemoveGoal: (goalId: string) => void;
   highlightedGoalId?: string | null;
@@ -50,8 +50,7 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newGoal.title.trim()) {
-      const goalId = Date.now().toString();
-      onAddGoal({
+      const goalId = onAddGoal({
         ...newGoal,
         completed: false
       });
@@ -135,8 +134,9 @@ export default function GoalsList({ goals, onToggleGoal, onAddGoal, onEditGoal, 
       recurring: 'daily',
       completed: false
     } as any;
-    onAddGoal(habitGoal);
-    setSelectedGoal(goal.id);
+    const newHabitId = onAddGoal(habitGoal);
+    setNewlyCreatedGoalId(newHabitId);
+    setSelectedGoal(newHabitId);
   };
 
   const getPriorityColor = (priority: string) => {

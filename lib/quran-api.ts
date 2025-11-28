@@ -12,6 +12,12 @@ export interface Verse {
   page: number;
   translation?: string;
   audio?: string; // Audio URL for the verse
+  surahNumber?: number;
+  surahName?: string;
+  surahEnglishName?: string;
+  surahEnglishNameTranslation?: string;
+  surahRevelationType?: 'Meccan' | 'Medinan';
+  surahAyahCount?: number;
 }
 
 export interface Surah {
@@ -97,7 +103,13 @@ class QuranAPI {
         numberInSurah: ayah.numberInSurah,
         juz: ayah.juz,
         page: ayah.page,
-        translation: englishSurah.ayahs[index]?.text || ''
+        translation: englishSurah.ayahs[index]?.text || '',
+        surahNumber: arabicSurah.number,
+        surahName: arabicSurah.name,
+        surahEnglishName: arabicSurah.englishName,
+        surahEnglishNameTranslation: arabicSurah.englishNameTranslation,
+        surahRevelationType: arabicSurah.revelationType,
+        surahAyahCount: arabicSurah.numberOfAyahs
       }));
 
       return {
@@ -160,7 +172,13 @@ class QuranAPI {
         juz: arabicVerse.juz,
         page: arabicVerse.page,
         translation: englishVerse.text,
-        audio: audioUrl || undefined
+        audio: audioUrl || undefined,
+        surahNumber: arabicVerse.surah?.number,
+        surahName: arabicVerse.surah?.name,
+        surahEnglishName: arabicVerse.surah?.englishName,
+        surahEnglishNameTranslation: arabicVerse.surah?.englishNameTranslation,
+        surahRevelationType: arabicVerse.surah?.revelationType,
+        surahAyahCount: arabicVerse.surah?.numberOfAyahs
       };
     } catch (error) {
       console.error('Error fetching verse:', error);
@@ -238,7 +256,13 @@ class QuranAPI {
         numberInSurah: match.numberInSurah,
         juz: match.juz,
         page: match.page,
-        translation: language === 'ar' ? undefined : match.text
+        translation: language === 'ar' ? undefined : match.text,
+        surahNumber: match.surah?.number,
+        surahName: match.surah?.name,
+        surahEnglishName: match.surah?.englishName,
+        surahEnglishNameTranslation: match.surah?.englishNameTranslation,
+        surahRevelationType: match.surah?.revelationType,
+        surahAyahCount: match.surah?.numberOfAyahs
       }));
     } catch (error) {
       console.error('Error searching verses:', error);
