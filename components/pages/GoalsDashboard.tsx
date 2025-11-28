@@ -53,6 +53,8 @@ const shouldResetRecurringGoal = (goal: Goal): boolean => {
         lastCompleted.getMonth() !== now.getMonth() ||
         lastCompleted.getFullYear() !== now.getFullYear()
       );
+    case 'yearly':
+      return lastCompleted.getFullYear() !== now.getFullYear();
     default:
       return false;
   }
@@ -146,12 +148,14 @@ export default function GoalsDashboard() {
     );
   };
 
-  const addGoal = (newGoal: Omit<Goal, 'id'>) => {
+  const addGoal = (newGoal: Omit<Goal, 'id'>): string => {
+    const id = Date.now().toString();
     const goal: Goal = {
       ...newGoal,
-      id: Date.now().toString(),
+      id,
     };
     setGoals(prev => [goal, ...prev]);
+    return id;
   };
 
   const editGoal = (goalId: string, updatedGoal: Omit<Goal, 'id'>) => {

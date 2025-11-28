@@ -5,7 +5,7 @@
  * Author: Karim Osman (https://kar.im)
  */
 
-import { quranAPI, type Verse, type RandomVerseResponse } from './quran-api';
+import { quranAPI, type Verse, type RandomVerseResponse, type Surah } from './quran-api';
 
 export interface QuranVerse {
   id: number;
@@ -202,9 +202,10 @@ class QuranEngine {
             const matches: GoalMatchResult[] = [];
             
             for (const apiVerse of directResults.slice(0, 1)) {
+              const surahMetadata = await this.buildSurahMetadata(apiVerse);
               const quranVerse = await this.convertAPIVerseToQuranVerse({
                 verse: apiVerse,
-                surah: { number: Math.floor(apiVerse.number / 1000) + 1 } as any,
+                surah: surahMetadata,
                 theme: 'guidance',
                 context: `Direct search for: ${goal}`
               });
@@ -272,9 +273,10 @@ class QuranEngine {
       })));
       
       for (const { apiVerse } of sortedResults.slice(0, 1)) { // Show only 1 verse initially
+        const surahMetadata = await this.buildSurahMetadata(apiVerse);
         const quranVerse = await this.convertAPIVerseToQuranVerse({
           verse: apiVerse,
-          surah: { number: Math.floor(apiVerse.number / 1000) + 1 } as any, // Approximate surah from verse number
+          surah: surahMetadata,
           theme,
           context: `Guidance for: ${goal}`
         });
@@ -373,9 +375,10 @@ class QuranEngine {
       const matches: GoalMatchResult[] = [];
       
       for (const { apiVerse } of sortedResults) {
+        const surahMetadata = await this.buildSurahMetadata(apiVerse);
         const quranVerse = await this.convertAPIVerseToQuranVerse({
           verse: apiVerse,
-          surah: { number: Math.floor(apiVerse.number / 1000) + 1 } as any,
+          surah: surahMetadata,
           theme,
           context: `Additional guidance for: ${goal}`
         });
@@ -419,9 +422,10 @@ class QuranEngine {
       
       // Convert up to 5 verses for the collection
       for (const apiVerse of searchResults.slice(0, 5)) {
+        const surahMetadata = await this.buildSurahMetadata(apiVerse);
         const quranVerse = await this.convertAPIVerseToQuranVerse({
           verse: apiVerse,
-          surah: { number: Math.floor(apiVerse.number / 1000) + 1 } as any,
+          surah: surahMetadata,
           theme,
           context: `Thematic guidance: ${theme}`
         });
@@ -551,6 +555,38 @@ class QuranEngine {
 
     const options = applications[theme] || applications.prayer;
     return options[Math.floor(Math.random() * options.length)];
+  }
+
+  private async buildSurahMetadata(apiVerse: Verse): Promise<Surah> {
+    if (apiVerse.surahNumber) {
+      return {
+        number: apiVerse.surahNumber,
+        name: apiVerse.surahName || `Surah ${apiVerse.surahNumber}`,
+        englishName: apiVerse.surahEnglishName || apiVerse.surahName || `Surah ${apiVerse.surahNumber}`,
+        englishNameTranslation: apiVerse.surahEnglishNameTranslation || '',
+        revelationType: apiVerse.surahRevelationType || 'Meccan',
+        numberOfAyahs: apiVerse.surahAyahCount || 0
+      };
+    }
+
+    const fallbackNumber = this.estimateSurahNumberFromGlobal(apiVerse.number);
+    try {
+      return await quranAPI.getSurah(fallbackNumber);
+    } catch {
+      return {
+        number: fallbackNumber,
+        name: `Surah ${fallbackNumber}`,
+        englishName: `Surah ${fallbackNumber}`,
+        englishNameTranslation: '',
+        revelationType: 'Meccan',
+        numberOfAyahs: 0
+      };
+    }
+  }
+
+  private estimateSurahNumberFromGlobal(globalVerseNumber: number): number {
+    if (!globalVerseNumber || globalVerseNumber < 1) return 1;
+    return Math.min(114, Math.max(1, Math.floor((globalVerseNumber - 1) / 60) + 1));
   }
 
   /**
