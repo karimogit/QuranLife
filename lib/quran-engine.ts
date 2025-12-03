@@ -467,6 +467,13 @@ class QuranEngine {
     try {
       const { verse, surah, theme, context } = apiResponse;
       
+      // Build audio URL from surah number and ayah if not already provided
+      // This ensures audio is available for verses from both direct fetch and search
+      const audioUrl = verse.audio || apiResponse.audio || 
+        (surah.number && verse.numberInSurah 
+          ? `/api/audio?surah=${surah.number}&ayah=${verse.numberInSurah}&edition=ar.alafasy`
+          : undefined);
+      
       return {
         id: verse.number,
         surah: surah.englishName || `Surah ${surah.number}`,
@@ -479,7 +486,7 @@ class QuranEngine {
         practical_guidance: PRACTICAL_GUIDANCE[theme || 'guidance']?.slice(0, 3),
         context: context || `From ${surah.englishName}`,
         life_application: this.generateLifeApplication(verse.translation || '', theme || 'guidance'),
-        audio: verse.audio || apiResponse.audio // Include audio from API
+        audio: audioUrl
       };
     } catch (error) {
       console.error('Error converting API verse:', error);
