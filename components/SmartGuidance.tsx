@@ -19,15 +19,98 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
   const [audioStates, setAudioStates] = useState<{ [key: number]: { isPlaying: boolean; isLoading: boolean; error: string | null } }>({});
   const audioRefs = useRef<{ [key: number]: HTMLAudioElement | null }>({});
 
+  // Extract a simpler related term from the goal title for retry
+  const getRelatedTerm = useCallback((title: string): string => {
+    // Common goal-related word mappings to broader Quran concepts
+    const termMappings: Record<string, string> = {
+      // Fitness & Health
+      'gym': 'strength',
+      'workout': 'effort',
+      'exercise': 'strive',
+      'fitness': 'health',
+      'running': 'effort',
+      'weight': 'patience',
+      'muscle': 'strength',
+      'diet': 'moderation',
+      // Career & Success
+      'job': 'provision',
+      'career': 'success',
+      'business': 'success',
+      'work': 'effort',
+      'money': 'provision',
+      'promotion': 'success',
+      // Personal Development
+      'learn': 'knowledge',
+      'study': 'wisdom',
+      'read': 'knowledge',
+      'habit': 'change',
+      'improve': 'change',
+      'better': 'change',
+      // Relationships
+      'marriage': 'family',
+      'spouse': 'family',
+      'children': 'family',
+      'parent': 'family',
+      'friend': 'mercy',
+      // Mental Health
+      'stress': 'peace',
+      'anxiety': 'trust',
+      'worry': 'patience',
+      'fear': 'trust',
+      'depression': 'hope',
+      // Spiritual
+      'pray': 'prayer',
+      'salah': 'prayer',
+      'quran': 'guidance',
+      'worship': 'prayer',
+      'faith': 'believe',
+    };
+
+    const words = title.toLowerCase().split(/\s+/);
+    
+    // First, try to find a direct mapping
+    for (const word of words) {
+      if (termMappings[word]) {
+        return termMappings[word];
+      }
+    }
+    
+    // If no direct mapping, extract meaningful keywords
+    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'my', 'i', 'do', 'get', 'make', 'have', 'be', 'is', 'are', 'more', 'less', 'start', 'begin', 'want'];
+    const meaningfulWords = words.filter(w => w.length > 3 && !stopWords.includes(w));
+    
+    if (meaningfulWords.length > 0) {
+      // Return the first meaningful word
+      return meaningfulWords[0];
+    }
+    
+    // Fallback to 'guidance' for general search
+    return 'guidance';
+  }, []);
+
   const loadGuidance = useCallback(async () => {
     try {
       setLoading(true);
       
       // Use the new QuranEngine API to find verses for the goal
       const goalText = `${goalTitle} ${goalDescription} ${goalCategory}`.trim();
-      const matches = await logger.performance.measure('loadGuidance', async () => {
+      let matches = await logger.performance.measure('loadGuidance', async () => {
         return await quranEngine.findVersesForGoal(goalText);
       });
+      
+      // If no results, retry with a simpler related term from the goal title
+      if (matches.length === 0) {
+        const relatedTerm = getRelatedTerm(goalTitle);
+        logger.info('No matches found, retrying with related term', { goalTitle, relatedTerm });
+        
+        matches = await quranEngine.findVersesForGoal(relatedTerm);
+        
+        // If still no results, try the category as a last resort
+        if (matches.length === 0 && goalCategory) {
+          logger.info('Still no matches, trying category', { goalCategory });
+          matches = await quranEngine.findVersesForGoal(goalCategory);
+        }
+      }
       
       setGuidance(matches);
       logger.info('Guidance loaded successfully', { goalText, matchCount: matches.length });
@@ -37,7 +120,7 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
     } finally {
       setLoading(false);
     }
-  }, [goalTitle, goalDescription, goalCategory]);
+  }, [goalTitle, goalDescription, goalCategory, getRelatedTerm]);
 
   useEffect(() => {
     loadGuidance();
@@ -154,46 +237,9 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
   }
 
   if (guidance.length === 0) {
-    return (
-      <div className="bg-gradient-to-br from-green-50 via-white to-blue-50 rounded-xl p-8 border border-green-100/50 shadow-lg relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-green-100/40 to-transparent rounded-full -translate-y-12 translate-x-12"></div>
-        <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-blue-100/40 to-transparent rounded-full translate-y-10 -translate-x-10"></div>
-        
-        <div className="relative z-10 text-center">
-          <div className="text-4xl mb-4">📖</div>
-          <h3 className="text-lg font-semibold text-green-700 mb-3">
-            Preparing Your Personalized Guidance
-          </h3>
-          <p className="text-green-600 text-sm mb-6">
-            While we're finding the perfect Quranic guidance for your goal, here are some universal Islamic principles to remember:
-          </p>
-        </div>
-        
-        <div className="space-y-4 relative z-10">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-l-4 border-green-400 shadow-sm">
-            <p className="text-sm text-green-700">
-              <strong className="text-green-800">Start with Bismillah:</strong> Begin every endeavor in the name of Allah
-            </p>
-          </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-l-4 border-green-400 shadow-sm">
-            <p className="text-sm text-green-700">
-              <strong className="text-green-800">Make sincere dua:</strong> Ask Allah for guidance and success in your goal
-            </p>
-          </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-l-4 border-green-400 shadow-sm">
-            <p className="text-sm text-green-700">
-              <strong className="text-green-800">Trust in Allah:</strong> "And whoever relies upon Allah - then He is sufficient for him" (65:3)
-            </p>
-          </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-l-4 border-green-400 shadow-sm">
-            <p className="text-sm text-green-700">
-              <strong className="text-green-800">Take action:</strong> Combine faith with effort - Allah helps those who help themselves
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    // This should rarely happen since we retry with related terms
+    // Return null to not show anything if we truly can't find guidance
+    return null;
   }
 
   return (
