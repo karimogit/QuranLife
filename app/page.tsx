@@ -231,7 +231,7 @@ export default function HomePage() {
 
         {/* Goals Grid */}
         {goals.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <AnimatePresence>
               {goals.map((goal) => {
                 const guidance = guidanceMap[goal.id]
@@ -326,9 +326,14 @@ export default function HomePage() {
                                     <div key={idx} className="space-y-3">
                                       {/* Surah reference */}
                                       <div className="flex items-center justify-between">
-                                        <span className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                                        <a
+                                          href={`https://quran.com/${match.verse.surah_number}/${match.verse.ayah}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full hover:bg-emerald-200 transition-colors"
+                                        >
                                           {match.verse.surah} ({match.verse.surah_number}:{match.verse.ayah})
-                                        </span>
+                                        </a>
                                         
                                         {/* Audio button */}
                                         {match.verse.audio && (
