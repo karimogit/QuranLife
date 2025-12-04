@@ -259,7 +259,7 @@ class QuranEngine {
         .map(apiVerse => ({
           apiVerse,
           relevanceScore: this.calculateRelevanceScore(goal, { 
-            text_en: apiVerse.translation || '', 
+            text_en: apiVerse.translation || apiVerse.text || '', 
             reflection: '' 
           } as any)
         }))
@@ -269,26 +269,38 @@ class QuranEngine {
       console.log('Top results by relevance:', sortedResults.map(r => ({ 
         verse: r.apiVerse.number, 
         score: r.relevanceScore,
-        text: r.apiVerse.translation?.substring(0, 100) + '...'
+        text: (r.apiVerse.translation || r.apiVerse.text)?.substring(0, 100) + '...'
       })));
       
       for (const { apiVerse } of sortedResults.slice(0, 1)) { // Show only 1 verse initially
-        const surahMetadata = await this.buildSurahMetadata(apiVerse);
-        const quranVerse = await this.convertAPIVerseToQuranVerse({
-          verse: apiVerse,
-          surah: surahMetadata,
-          theme,
-          context: `Guidance for: ${goal}`
-        });
+        // Fetch full verse data with both Arabic and English text
+        // Search results only contain one language, so we need the complete verse
+        const surahNum = apiVerse.surahNumber || apiVerse.surah?.number;
+        const verseNum = apiVerse.numberInSurah;
+        
+        if (surahNum && verseNum) {
+          try {
+            const fullVerse = await quranAPI.getVerse(surahNum, verseNum);
+            const surahMetadata = await this.buildSurahMetadata(fullVerse);
+            const quranVerse = await this.convertAPIVerseToQuranVerse({
+              verse: fullVerse,
+              surah: surahMetadata,
+              theme,
+              context: `Guidance for: ${goal}`
+            });
 
-        if (quranVerse) {
-          matches.push({
-            verse: quranVerse,
-            relevanceScore: this.calculateRelevanceScore(goal, quranVerse),
-            practicalSteps: this.generatePracticalSteps(theme, goal),
-            duaRecommendation: DUA_RECOMMENDATIONS[theme],
-            relatedHabits: this.getRelatedHabits(theme)
-          });
+            if (quranVerse) {
+              matches.push({
+                verse: quranVerse,
+                relevanceScore: this.calculateRelevanceScore(goal, quranVerse),
+                practicalSteps: this.generatePracticalSteps(theme, goal),
+                duaRecommendation: DUA_RECOMMENDATIONS[theme],
+                relatedHabits: this.getRelatedHabits(theme)
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching full verse data:', error);
+          }
         }
       }
 
@@ -358,7 +370,7 @@ class QuranEngine {
         .map(apiVerse => ({
           apiVerse,
           relevanceScore: this.calculateRelevanceScore(goal, { 
-            text_en: apiVerse.translation || '', 
+            text_en: apiVerse.translation || apiVerse.text || '', 
             reflection: '' 
           } as any)
         }))
@@ -368,29 +380,41 @@ class QuranEngine {
       console.log('Additional results by relevance:', sortedResults.map(r => ({ 
         verse: r.apiVerse.number, 
         score: r.relevanceScore,
-        text: r.apiVerse.translation?.substring(0, 100) + '...'
+        text: (r.apiVerse.translation || r.apiVerse.text)?.substring(0, 100) + '...'
       })));
 
       // Convert API results to goal matches
       const matches: GoalMatchResult[] = [];
       
       for (const { apiVerse } of sortedResults) {
-        const surahMetadata = await this.buildSurahMetadata(apiVerse);
-        const quranVerse = await this.convertAPIVerseToQuranVerse({
-          verse: apiVerse,
-          surah: surahMetadata,
-          theme,
-          context: `Additional guidance for: ${goal}`
-        });
+        // Fetch full verse data with both Arabic and English text
+        // Search results only contain one language, so we need the complete verse
+        const surahNum = apiVerse.surahNumber || apiVerse.surah?.number;
+        const verseNum = apiVerse.numberInSurah;
+        
+        if (surahNum && verseNum) {
+          try {
+            const fullVerse = await quranAPI.getVerse(surahNum, verseNum);
+            const surahMetadata = await this.buildSurahMetadata(fullVerse);
+            const quranVerse = await this.convertAPIVerseToQuranVerse({
+              verse: fullVerse,
+              surah: surahMetadata,
+              theme,
+              context: `Additional guidance for: ${goal}`
+            });
 
-        if (quranVerse) {
-          matches.push({
-            verse: quranVerse,
-            relevanceScore: this.calculateRelevanceScore(goal, quranVerse),
-            practicalSteps: this.generatePracticalSteps(theme, goal),
-            duaRecommendation: DUA_RECOMMENDATIONS[theme],
-            relatedHabits: this.getRelatedHabits(theme)
-          });
+            if (quranVerse) {
+              matches.push({
+                verse: quranVerse,
+                relevanceScore: this.calculateRelevanceScore(goal, quranVerse),
+                practicalSteps: this.generatePracticalSteps(theme, goal),
+                duaRecommendation: DUA_RECOMMENDATIONS[theme],
+                relatedHabits: this.getRelatedHabits(theme)
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching full verse data:', error);
+          }
         }
       }
 
