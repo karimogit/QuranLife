@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation';
+'use client'
+
+import GoalsDashboard from '@/components/pages/GoalsDashboard'
 
 export default function GoalsPage() {
-  redirect('/');
+  return <GoalsDashboard />
 }
