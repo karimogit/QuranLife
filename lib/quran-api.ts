@@ -11,6 +11,7 @@ export interface Verse {
   juz: number;
   page: number;
   translation?: string;
+  transliteration?: string; // Phonetic/transliteration text
   audio?: string; // Audio URL for the verse
   surahNumber?: number;
   surahName?: string;
@@ -42,6 +43,7 @@ class QuranAPI {
   private readonly baseURL = 'https://api.alquran.cloud/v1';
   private readonly arabicEdition = 'quran-uthmani';
   private readonly englishEdition = 'en.asad'; // Muhammad Asad translation
+  private readonly transliterationEdition = 'en.transliteration'; // Phonetic/transliteration
   private audioEdition = 'ar.alafasy'; // Default: Mishary Rashid Alafasy recitation
 
   /**
@@ -142,12 +144,12 @@ class QuranAPI {
   }
 
   /**
-   * Get a specific verse with both Arabic text and English translation
+   * Get a specific verse with Arabic text, English translation, and transliteration
    */
   async getVerse(surahNumber: number, verseNumber: number): Promise<Verse> {
     try {
       const response = await fetch(
-        `${this.baseURL}/ayah/${surahNumber}:${verseNumber}/editions/${this.arabicEdition},${this.englishEdition}`
+        `${this.baseURL}/ayah/${surahNumber}:${verseNumber}/editions/${this.arabicEdition},${this.englishEdition},${this.transliterationEdition}`
       );
       
       if (!response.ok) {
@@ -157,6 +159,7 @@ class QuranAPI {
       const data = await response.json();
       const arabicVerse = data.data.find((v: any) => v.edition.identifier === this.arabicEdition);
       const englishVerse = data.data.find((v: any) => v.edition.identifier === this.englishEdition);
+      const transliterationVerse = data.data.find((v: any) => v.edition.identifier === this.transliterationEdition);
 
       if (!arabicVerse || !englishVerse) {
         throw new Error('Missing Arabic or English text for verse');
@@ -172,6 +175,7 @@ class QuranAPI {
         juz: arabicVerse.juz,
         page: arabicVerse.page,
         translation: englishVerse.text,
+        transliteration: transliterationVerse?.text || undefined,
         audio: audioUrl || undefined,
         surahNumber: arabicVerse.surah?.number,
         surahName: arabicVerse.surah?.name,

@@ -19,6 +19,8 @@ interface GoalGuidance {
   showGuidance: boolean
 }
 
+type TextDisplayMode = 'english' | 'phonetic';
+
 export default function HomePage() {
   const [goalTitle, setGoalTitle] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -26,6 +28,7 @@ export default function HomePage() {
   const [goals, setGoals] = useState<Goal[]>([])
   const [guidanceMap, setGuidanceMap] = useState<Record<string, GoalGuidance>>({})
   const [audioStates, setAudioStates] = useState<Record<string, { isPlaying: boolean; isLoading: boolean }>>({})
+  const [textDisplayMode, setTextDisplayMode] = useState<TextDisplayMode>('english')
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
   // Load goals from storage on mount
@@ -370,9 +373,35 @@ export default function HomePage() {
                                         {match.verse.text_ar}
                                       </p>
 
-                                      {/* English translation */}
+                                      {/* Toggle for English/Phonetic */}
+                                      <div className="flex items-center justify-center gap-1 py-2">
+                                        <button
+                                          onClick={() => setTextDisplayMode('english')}
+                                          className={`px-3 py-1 text-xs font-medium rounded-l-full transition-all ${
+                                            textDisplayMode === 'english'
+                                              ? 'bg-emerald-500 text-white'
+                                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                          }`}
+                                        >
+                                          English
+                                        </button>
+                                        <button
+                                          onClick={() => setTextDisplayMode('phonetic')}
+                                          className={`px-3 py-1 text-xs font-medium rounded-r-full transition-all ${
+                                            textDisplayMode === 'phonetic'
+                                              ? 'bg-emerald-500 text-white'
+                                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                          }`}
+                                        >
+                                          Phonetic
+                                        </button>
+                                      </div>
+
+                                      {/* English translation or Phonetic */}
                                       <p className="text-sm text-gray-600 italic leading-relaxed">
-                                        "{match.verse.text_en}"
+                                        {textDisplayMode === 'phonetic' && match.verse.text_transliteration
+                                          ? match.verse.text_transliteration
+                                          : `"${match.verse.text_en}"`}
                                       </p>
 
                                       {/* Reflection */}
