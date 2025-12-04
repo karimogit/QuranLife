@@ -14,6 +14,7 @@ export interface QuranVerse {
   ayah: number;
   text_ar: string;
   text_en: string;
+  text_transliteration?: string; // Phonetic/transliteration text
   theme: string[];
   reflection: string;
   practical_guidance?: string[];
@@ -587,6 +588,7 @@ class QuranEngine {
         ayah: verse.numberInSurah,
         text_ar: verse.text,
         text_en: verse.translation || '',
+        text_transliteration: verse.transliteration || undefined,
         theme: theme ? [theme] : ['guidance'],
         reflection: this.generateReflection(verse.translation || '', theme || 'guidance'),
         practical_guidance: PRACTICAL_GUIDANCE[theme || 'guidance']?.slice(0, 3),
@@ -793,6 +795,7 @@ class QuranEngine {
       ayah: 255,
       text_ar: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
       text_en: "Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence.",
+      text_transliteration: "Allahu la ilaha illa huwal hayyul qayyum",
       theme: ["faith", "strength"],
       reflection: "This powerful verse reminds us that Allah is always present and in control, providing strength and comfort in all situations.",
       practical_guidance: [

@@ -10,6 +10,7 @@ interface Verse {
   ayah: number;
   text_ar: string;
   text_en: string;
+  text_transliteration?: string; // Phonetic/transliteration text
   theme: string[];
   reflection: string;
   audio?: string; // Audio URL for the verse
@@ -19,11 +20,14 @@ interface VerseCardProps {
   verse: Verse;
 }
 
+type TextDisplayMode = 'english' | 'phonetic';
+
 export default function VerseCard({ verse }: VerseCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [textDisplayMode, setTextDisplayMode] = useState<TextDisplayMode>('english');
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Detect mobile device
@@ -239,8 +243,35 @@ export default function VerseCard({ verse }: VerseCardProps) {
         <p className="text-xl leading-relaxed text-gray-800 mb-4 font-arabic" dir="rtl">
           {verse.text_ar}
         </p>
+        
+        {/* Toggle for English/Phonetic */}
+        <div className="flex items-center justify-center gap-1 py-2">
+          <button
+            onClick={() => setTextDisplayMode('english')}
+            className={`px-3 py-1 text-xs font-medium rounded-l-full transition-all ${
+              textDisplayMode === 'english'
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            English
+          </button>
+          <button
+            onClick={() => setTextDisplayMode('phonetic')}
+            className={`px-3 py-1 text-xs font-medium rounded-r-full transition-all ${
+              textDisplayMode === 'phonetic'
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Phonetic
+          </button>
+        </div>
+
         <p className="text-gray-600 leading-relaxed italic">
-          "{verse.text_en}"
+          {textDisplayMode === 'phonetic' && verse.text_transliteration
+            ? verse.text_transliteration
+            : `"${verse.text_en}"`}
         </p>
       </div>
 
