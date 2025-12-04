@@ -326,9 +326,14 @@ export default function HomePage() {
                                     <div key={idx} className="space-y-3">
                                       {/* Surah reference */}
                                       <div className="flex items-center justify-between">
-                                        <span className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                                        <a
+                                          href={`https://quran.com/${match.verse.surah_number}/${match.verse.ayah}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full hover:bg-emerald-200 transition-colors"
+                                        >
                                           {match.verse.surah} ({match.verse.surah_number}:{match.verse.ayah})
-                                        </span>
+                                        </a>
                                         
                                         {/* Audio button */}
                                         {match.verse.audio && (
