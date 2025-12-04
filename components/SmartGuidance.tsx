@@ -21,49 +21,148 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
 
   // Extract a simpler related term from the goal title for retry
   const getRelatedTerm = useCallback((title: string): string => {
-    // Common goal-related word mappings to broader Quran concepts
+    // Comprehensive mappings from modern vocabulary to Quranic themes
     const termMappings: Record<string, string> = {
+      // Love & Relationships
+      'love': 'love',
+      'loving': 'love',
+      'romance': 'love',
+      'romantic': 'love',
+      'dating': 'love',
+      'date': 'love',
+      'soulmate': 'love',
+      'partner': 'marriage',
+      'finding': 'love', // "finding love"
+      'relationship': 'relationships',
+      'relationships': 'relationships',
+      'friend': 'relationships',
+      'friends': 'relationships',
+      'friendship': 'relationships',
+      'marriage': 'marriage',
+      'marry': 'marriage',
+      'married': 'marriage',
+      'wedding': 'marriage',
+      'spouse': 'marriage',
+      'husband': 'marriage',
+      'wife': 'marriage',
+      'engaged': 'marriage',
+      
+      // Family
+      'family': 'family',
+      'parent': 'family',
+      'parents': 'family',
+      'children': 'family',
+      'child': 'family',
+      'kids': 'family',
+      'mother': 'family',
+      'father': 'family',
+      'mom': 'family',
+      'dad': 'family',
+      'son': 'family',
+      'daughter': 'family',
+      
       // Fitness & Health
-      'gym': 'strength',
-      'workout': 'effort',
-      'exercise': 'strive',
-      'fitness': 'health',
-      'running': 'effort',
-      'weight': 'patience',
-      'muscle': 'strength',
-      'diet': 'moderation',
-      // Career & Success
-      'job': 'provision',
-      'career': 'success',
-      'business': 'success',
-      'work': 'effort',
-      'money': 'provision',
-      'promotion': 'success',
+      'gym': 'fitness',
+      'workout': 'fitness',
+      'exercise': 'fitness',
+      'fitness': 'fitness',
+      'running': 'fitness',
+      'muscle': 'fitness',
+      'training': 'fitness',
+      'weight': 'health',
+      'diet': 'health',
+      'health': 'health',
+      'healthy': 'health',
+      'wellness': 'health',
+      'sleep': 'health',
+      'energy': 'health',
+      
+      // Career & Finance
+      'job': 'career',
+      'career': 'career',
+      'business': 'career',
+      'work': 'career',
+      'promotion': 'career',
+      'interview': 'career',
+      'money': 'wealth',
+      'wealth': 'wealth',
+      'financial': 'wealth',
+      'savings': 'wealth',
+      'debt': 'wealth',
+      'income': 'wealth',
+      'rich': 'wealth',
+      
+      // Education & Learning
+      'learn': 'education',
+      'learning': 'education',
+      'study': 'education',
+      'studying': 'education',
+      'school': 'education',
+      'college': 'education',
+      'university': 'education',
+      'exam': 'education',
+      'knowledge': 'education',
+      'read': 'education',
+      'reading': 'education',
+      
       // Personal Development
-      'learn': 'knowledge',
-      'study': 'wisdom',
-      'read': 'knowledge',
       'habit': 'change',
+      'habits': 'change',
       'improve': 'change',
       'better': 'change',
-      // Relationships
-      'marriage': 'family',
-      'spouse': 'family',
-      'children': 'family',
-      'parent': 'family',
-      'friend': 'mercy',
-      // Mental Health
-      'stress': 'peace',
-      'anxiety': 'trust',
-      'worry': 'patience',
-      'fear': 'trust',
-      'depression': 'hope',
+      'change': 'change',
+      'transform': 'change',
+      'goal': 'success',
+      'goals': 'success',
+      'success': 'success',
+      'achieve': 'success',
+      'accomplish': 'success',
+      'discipline': 'discipline',
+      'focus': 'discipline',
+      'productive': 'discipline',
+      'motivation': 'discipline',
+      'purpose': 'purpose',
+      'meaning': 'purpose',
+      'direction': 'purpose',
+      
+      // Mental & Emotional
+      'stress': 'anxiety',
+      'anxiety': 'anxiety',
+      'anxious': 'anxiety',
+      'worry': 'anxiety',
+      'fear': 'anxiety',
+      'depression': 'anxiety',
+      'overwhelmed': 'anxiety',
+      'peace': 'happiness',
+      'happy': 'happiness',
+      'happiness': 'happiness',
+      'joy': 'happiness',
+      'content': 'happiness',
+      
       // Spiritual
       'pray': 'prayer',
+      'prayer': 'prayer',
       'salah': 'prayer',
-      'quran': 'guidance',
+      'quran': 'prayer',
       'worship': 'prayer',
-      'faith': 'believe',
+      'faith': 'trust',
+      'trust': 'trust',
+      'believe': 'trust',
+      'grateful': 'gratitude',
+      'gratitude': 'gratitude',
+      'thankful': 'gratitude',
+      'forgive': 'forgiveness',
+      'forgiveness': 'forgiveness',
+      'patience': 'patience',
+      'patient': 'patience',
+      'wait': 'patience',
+      
+      // Social
+      'community': 'social',
+      'volunteer': 'social',
+      'help': 'social',
+      'charity': 'social',
+      'give': 'social',
     };
 
     const words = title.toLowerCase().split(/\s+/);
@@ -76,7 +175,7 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
     }
     
     // If no direct mapping, extract meaningful keywords
-    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'my', 'i', 'do', 'get', 'make', 'have', 'be', 'is', 'are', 'more', 'less', 'start', 'begin', 'want'];
+    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'my', 'i', 'do', 'get', 'make', 'have', 'be', 'is', 'are', 'more', 'less', 'start', 'begin', 'want', 'need', 'would', 'like', 'find', 'some'];
     const meaningfulWords = words.filter(w => w.length > 3 && !stopWords.includes(w));
     
     if (meaningfulWords.length > 0) {
