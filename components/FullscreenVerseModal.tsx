@@ -137,26 +137,26 @@ export default function FullscreenVerseModal({
             />
           )}
 
+          {/* Close button - fixed position */}
+          <button
+            onClick={onClose}
+            className="fixed top-4 right-4 md:top-8 md:right-8 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all group"
+            aria-label="Close fullscreen view"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           {/* Content container */}
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            className="relative h-full flex flex-col items-center justify-center p-6 md:p-12 fullscreen-verse-content overflow-auto"
+            className="relative h-full w-full flex flex-col items-center p-6 pt-16 md:p-12 md:pt-20 fullscreen-verse-content overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 md:top-8 md:right-8 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all group"
-              aria-label="Close fullscreen view"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
             {/* Surah info */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
@@ -243,7 +243,7 @@ export default function FullscreenVerseModal({
             )}
 
             {/* Audio controls and keyboard hint container */}
-            <div className="mt-auto pt-4 flex flex-col items-center gap-4 pb-16 md:pb-20">
+            <div className="pt-4 flex flex-col items-center gap-4 pb-6 md:pb-8">
               {/* Audio controls */}
               {audioUrl && (
                 <motion.div
