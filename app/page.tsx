@@ -402,7 +402,7 @@ export default function HomePage() {
               initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="mb-8"
+              className="mb-4"
             >
               <h2 className={`text-xl md:text-2xl lg:text-3xl font-semibold leading-relaxed ${
                 currentGoal?.completed ? 'text-white/40 line-through' : 'text-white'
@@ -410,6 +410,21 @@ export default function HomePage() {
                 {currentGoal?.title}
               </h2>
             </motion.div>
+
+            {/* Reflection - How this applies */}
+            {currentVerse?.verse.reflection && (
+              <motion.div
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.15 }}
+                className="mb-8 max-w-2xl mx-auto"
+              >
+                <p className="text-sm md:text-base text-emerald-300/70 leading-relaxed">
+                  <span className="font-medium text-emerald-300">How this applies: </span>
+                  {currentVerse.verse.reflection}
+                </p>
+              </motion.div>
+            )}
 
             {/* Loading state */}
             {currentGuidance?.loading && (
@@ -426,22 +441,13 @@ export default function HomePage() {
             {/* Verse display */}
             {!currentGuidance?.loading && currentVerse && (
               <>
-                {/* Surah reference with font size controls */}
+                {/* Surah reference with font size controls and play button */}
                 <motion.div
                   initial={{ y: -10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.15 }}
                   className="mb-6 md:mb-8 flex items-center justify-center gap-3"
                 >
-                  <a
-                    href={`https://quran.com/${currentVerse.verse.surah_number}/${currentVerse.verse.ayah}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block px-4 py-2 bg-emerald-500/20 text-emerald-300 rounded-full text-sm md:text-base font-medium border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors"
-                  >
-                    {currentVerse.verse.surah} ({currentVerse.verse.surah_number}:{currentVerse.verse.ayah})
-                  </a>
-                  
                   {/* Font size controls */}
                   <div className="flex items-center gap-1">
                     <button
@@ -465,6 +471,45 @@ export default function HomePage() {
                       </svg>
                     </button>
                   </div>
+
+                  {/* Surah name link */}
+                  <a
+                    href={`https://quran.com/${currentVerse.verse.surah_number}/${currentVerse.verse.ayah}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-4 py-2 bg-emerald-500/20 text-emerald-300 rounded-full text-sm md:text-base font-medium border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors"
+                  >
+                    {currentVerse.verse.surah} ({currentVerse.verse.surah_number}:{currentVerse.verse.ayah})
+                  </a>
+                  
+                  {/* Play button */}
+                  {currentVerse.verse.audio && (
+                    <button
+                      onClick={handleAudioToggle}
+                      disabled={isAudioLoading}
+                      className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${
+                        isPlaying
+                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                          : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white border border-white/20'
+                      } ${isAudioLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      aria-label={isPlaying ? 'Pause recitation' : 'Play recitation'}
+                    >
+                      {isAudioLoading ? (
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                      ) : isPlaying ? (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      )}
+                    </button>
+                  )}
                 </motion.div>
 
                 {/* Arabic text */}
@@ -513,92 +558,37 @@ export default function HomePage() {
                   </motion.div>
                 )}
 
-                {/* Reflection */}
-                {currentVerse.verse.reflection && (
+                {/* Verse navigation */}
+                {currentGuidance?.guidance && currentGuidance.guidance.length > 1 && (
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.35 }}
-                    className="mb-8 max-w-2xl mx-auto"
+                    transition={{ delay: 0.4 }}
+                    className="flex items-center justify-center gap-3"
                   >
-                    <p className="text-sm md:text-base text-emerald-300/70 leading-relaxed">
-                      <span className="font-medium text-emerald-300">How this applies: </span>
-                      {currentVerse.verse.reflection}
-                    </p>
+                    <button
+                      onClick={() => navigateVerse('prev')}
+                      className="p-3 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors touch-manipulation"
+                      aria-label="Previous verse"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <span className="text-sm text-white/50">
+                      Verse {currentVerseIndex + 1} of {currentGuidance.guidance.length}
+                    </span>
+                    <button
+                      onClick={() => navigateVerse('next')}
+                      className="p-3 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors touch-manipulation"
+                      aria-label="Next verse"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   </motion.div>
                 )}
-
-                {/* Audio and verse navigation */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="flex flex-col items-center gap-4"
-                >
-                  {/* Audio button */}
-                  {currentVerse.verse.audio && (
-                    <button
-                      onClick={handleAudioToggle}
-                      disabled={isAudioLoading}
-                      className={`flex items-center gap-3 px-8 py-4 rounded-full text-lg font-medium transition-all ${
-                        isPlaying
-                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                          : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                      } ${isAudioLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      {isAudioLoading ? (
-                        <>
-                          <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                          </svg>
-                          <span>Loading...</span>
-                        </>
-                      ) : isPlaying ? (
-                        <>
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
-                          </svg>
-                          <span>Pause Recitation</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                          <span>Listen to Recitation</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-
-                  {/* Verse navigation */}
-                  {currentGuidance?.guidance && currentGuidance.guidance.length > 1 && (
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => navigateVerse('prev')}
-                        className="p-3 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors touch-manipulation"
-                        aria-label="Previous verse"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <span className="text-sm text-white/50">
-                        Verse {currentVerseIndex + 1} of {currentGuidance.guidance.length}
-                      </span>
-                      <button
-                        onClick={() => navigateVerse('next')}
-                        className="p-3 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors touch-manipulation"
-                        aria-label="Next verse"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-                </motion.div>
               </>
             )}
 
