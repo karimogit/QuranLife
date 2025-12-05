@@ -106,6 +106,7 @@ const habitTemplates = [
 
 export default function HabitsPage() {
   const [habits, setHabits] = useState<Habit[]>(defaultHabits);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [addedTemplate, setAddedTemplate] = useState<string | null>(null);
 
   // Helper function to check if a habit should be considered completed for its frequency
@@ -224,12 +225,15 @@ export default function HabitsPage() {
       streak: calculateStreak(habit)
     }));
     setHabits(updatedHabits);
+    setIsLoaded(true);
   }, []);
 
-  // Save habits to localStorage whenever habits change
+  // Save habits to localStorage only after initial load is complete
   useEffect(() => {
-    storage.set('quranlife-habits', habits);
-  }, [habits]);
+    if (isLoaded) {
+      storage.set('quranlife-habits', habits);
+    }
+  }, [habits, isLoaded]);
 
   const toggleHabit = (habitId: string) => {
     setHabits(prev => 

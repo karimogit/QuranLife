@@ -69,10 +69,12 @@ const formatDate = (dateString?: string) => {
 
 export default function GoalsDashboard() {
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [calendarSelectedGoal, setCalendarSelectedGoal] = useState<string | null>(null);
 
+  // Load goals from localStorage on mount
   useEffect(() => {
     const savedGoals = storage.get<Goal[]>('quranlife-goals', []);
     const normalizedGoals = savedGoals.map((goal: Goal) =>
@@ -81,11 +83,15 @@ export default function GoalsDashboard() {
         : goal
     );
     setGoals(normalizedGoals);
+    setIsLoaded(true);
   }, []);
 
+  // Save goals to localStorage only after initial load is complete
   useEffect(() => {
-    storage.set('quranlife-goals', goals);
-  }, [goals]);
+    if (isLoaded) {
+      storage.set('quranlife-goals', goals);
+    }
+  }, [goals, isLoaded]);
 
   const activeGoals = useMemo(() => goals.filter(goal => !goal.completed), [goals]);
   const completedGoals = useMemo(() => goals.filter(goal => goal.completed), [goals]);
