@@ -275,124 +275,78 @@ class QuranEngine {
 
   /**
    * Find verses matching specific goals or themes
-   * Uses a curated-first approach since API search often fails for modern vocabulary
+   * Uses GPT-4.1 nano for semantic understanding of goals
    */
   async findVersesForGoal(goal: string): Promise<GoalMatchResult[]> {
     try {
-      // Extract keywords from goal
+      console.log('Finding verses for goal using AI:', goal);
+      
+      // Call the AI API to get semantically relevant verse references
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ goal })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('AI API error:', response.status, errorData);
+        throw new Error(`AI API error: ${response.status}`);
+      }
+
+      const aiResult = await response.json();
+      const verseRefs: Array<{ surah: number; ayah: number }> = aiResult.verses || [];
+      console.log('AI recommended verses:', verseRefs);
+
+      if (verseRefs.length === 0) {
+        throw new Error('No verses returned from AI');
+      }
+
+      // Determine theme from goal keywords for practical guidance
       const keywords = this.extractKeywords(goal);
       const theme = this.determineTheme(keywords);
-      
-      console.log('Goal analysis:', { goal, keywords, theme });
-      
-      // STRATEGY: Use curated verses first (reliable), then optionally enhance with API search
-      // This ensures we always return relevant results even for modern vocabulary
-      
-      // Step 1: Get curated verses for the detected theme (these are guaranteed to be relevant)
-      console.log('Getting curated verses for theme:', theme);
-      const curatedResults = await this.getThematicVersesForGoal(theme, goal);
-      
-      if (curatedResults.length > 0) {
-        console.log('Found curated verses:', curatedResults.length);
-        return curatedResults.slice(0, 5); // Return up to 5 curated verses for navigation
-      }
-      
-      // Step 2: If curated verses failed (rare), try API search as backup
-      console.log('Curated verses not available, trying API search...');
-      
-      const distinctByNumber = (arr: any[]) => {
-        const seen = new Set<number>();
-        const out: any[] = [];
-        for (const v of arr) {
-          if (!seen.has(v.number)) { seen.add(v.number); out.push(v); }
-        }
-        return out;
-      };
 
-      // Create search queries using Quranic vocabulary
-      const searchQueries = this.buildSearchQueries(goal, keywords, theme);
-      let aggregated: any[] = [];
+      // Fetch the actual verse data for each recommendation
+      const matches: GoalMatchResult[] = [];
       
-      // Try each search query
-      for (const query of searchQueries.slice(0, 5)) { // Limit to 5 queries for performance
+      for (const ref of verseRefs.slice(0, 5)) {
         try {
-          const res = await quranAPI.searchVerses(query, 'en');
-          if (res.length > 0) {
-            console.log(`Query "${query}" returned ${res.length} results`);
-            aggregated = distinctByNumber([...aggregated, ...res]);
-            if (aggregated.length >= 3) break;
-          }
-        } catch (error) {
-          continue;
-        }
-      }
-      
-      // If API search found results, use them
-      if (aggregated.length > 0) {
-        const matches: GoalMatchResult[] = [];
-        const apiVerse = aggregated[0];
-        const surahNum = apiVerse.surahNumber || apiVerse.surah?.number;
-        const verseNum = apiVerse.numberInSurah;
-        
-        if (surahNum && verseNum) {
-          try {
-            const fullVerse = await quranAPI.getVerse(surahNum, verseNum);
-            const surahMetadata = await this.buildSurahMetadata(fullVerse);
-            const quranVerse = await this.convertAPIVerseToQuranVerse({
-              verse: fullVerse,
-              surah: surahMetadata,
-              theme,
-              context: `Guidance for: ${goal}`
-            });
+          const [verse, surah] = await Promise.all([
+            quranAPI.getVerse(ref.surah, ref.ayah),
+            quranAPI.getSurah(ref.surah)
+          ]);
 
-            if (quranVerse) {
-              matches.push({
-                verse: quranVerse,
-                relevanceScore: this.calculateRelevanceScore(goal, quranVerse),
-                practicalSteps: this.generatePracticalSteps(theme, goal),
-                duaRecommendation: DUA_RECOMMENDATIONS[theme],
-                relatedHabits: this.getRelatedHabits(theme)
-              });
-              return matches;
-            }
-          } catch (error) {
-            console.error('Error fetching full verse data:', error);
+          const quranVerse = await this.convertAPIVerseToQuranVerse({
+            verse,
+            surah,
+            theme,
+            context: `Guidance for: ${goal}`
+          });
+
+          if (quranVerse) {
+            matches.push({
+              verse: quranVerse,
+              relevanceScore: 0.9,
+              practicalSteps: this.generatePracticalSteps(theme, goal),
+              duaRecommendation: DUA_RECOMMENDATIONS[theme],
+              relatedHabits: this.getRelatedHabits(theme)
+            });
           }
+        } catch (verseError) {
+          console.error(`Error fetching verse ${ref.surah}:${ref.ayah}:`, verseError);
         }
       }
-      
-      // Step 3: Final fallback - try alternative themes
-      console.log('No results found, trying alternative themes...');
-      const alternativeThemes = ['guidance', 'success', 'patience', 'trust', 'prayer'];
-      for (const altTheme of alternativeThemes) {
-        if (altTheme !== theme) {
-          const altResults = await this.getThematicVersesForGoal(altTheme, goal);
-          if (altResults.length > 0) {
-            console.log('Found results with alternative theme:', altTheme);
-            return altResults.slice(0, 1);
-          }
-        }
+
+      if (matches.length > 0) {
+        console.log('Successfully matched', matches.length, 'verses via AI');
+        return matches;
       }
-      
-      // Ultimate fallback - return a general guidance verse
-      console.log('Using ultimate fallback verse');
-      return [{
-        verse: this.getFallbackVerse(),
-        relevanceScore: 0.5,
-        practicalSteps: this.generatePracticalSteps('guidance', goal),
-        duaRecommendation: DUA_RECOMMENDATIONS['guidance'],
-        relatedHabits: this.getRelatedHabits('guidance')
-      }];
+
+      throw new Error('Failed to fetch any recommended verses');
+
     } catch (error) {
       console.error('Error finding verses for goal:', error);
-      // Return fallback verse
-      return [{
-        verse: this.getFallbackVerse(),
-        relevanceScore: 0.5,
-        practicalSteps: this.generatePracticalSteps('guidance', goal),
-        duaRecommendation: DUA_RECOMMENDATIONS['guidance'],
-        relatedHabits: this.getRelatedHabits('guidance')
-      }];
+      throw error;
     }
   }
 
