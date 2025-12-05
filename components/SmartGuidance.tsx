@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { quranEngine, GoalMatchResult } from '@/lib/quran-engine';
 import { logger } from '@/lib/logger';
+import FullscreenVerseModal from './FullscreenVerseModal';
 
 interface SmartGuidanceProps {
   goalTitle: string;
@@ -17,6 +18,14 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
   const [loadingMore, setLoadingMore] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null); // No items expanded by default
   const [audioStates, setAudioStates] = useState<{ [key: number]: { isPlaying: boolean; isLoading: boolean; error: string | null } }>({});
+  const [fullscreenVerse, setFullscreenVerse] = useState<{
+    arabicText: string;
+    englishText: string;
+    transliterationText?: string;
+    surahInfo: string;
+    audioUrl?: string;
+    reflection?: string;
+  } | null>(null);
   const audioRefs = useRef<{ [key: number]: HTMLAudioElement | null }>({});
 
   // Extract a simpler related term from the goal title for retry
@@ -385,7 +394,26 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
               <div className="text-sm font-medium text-green-700 bg-green-100 px-3 py-1.5 rounded-full">
                 {match.verse.surah} ({match.verse.surah_number}:{match.verse.ayah})
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                {/* Fullscreen Button */}
+                <button
+                  onClick={() => setFullscreenVerse({
+                    arabicText: match.verse.text_ar,
+                    englishText: match.verse.text_en,
+                    transliterationText: match.verse.text_transliteration,
+                    surahInfo: `${match.verse.surah} (${match.verse.surah_number}:${match.verse.ayah})`,
+                    audioUrl: match.verse.audio,
+                    reflection: match.verse.reflection
+                  })}
+                  className="p-2 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all"
+                  aria-label="View verse fullscreen"
+                  title="View fullscreen"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                  </svg>
+                </button>
+
                 {/* Audio Button */}
                 {match.verse.audio ? (
                   <button
@@ -442,9 +470,14 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
               </motion.div>
             )}
 
-            {/* Arabic Text */}
+            {/* Arabic Text with highlighting effect */}
             <div className="text-center mb-6 relative z-10">
-              <p className="text-xl leading-relaxed text-gray-800 mb-4 font-arabic" dir="rtl">
+              <p 
+                className={`text-xl leading-relaxed text-gray-800 mb-4 font-arabic transition-all duration-300 ${
+                  audioStates[index]?.isPlaying ? 'arabic-playing' : ''
+                }`} 
+                dir="rtl"
+              >
                 {match.verse.text_ar}
               </p>
               <p className="text-gray-600 leading-relaxed italic">
@@ -492,7 +525,19 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
         </button>
       </div>
 
-
+      {/* Fullscreen Verse Modal */}
+      {fullscreenVerse && (
+        <FullscreenVerseModal
+          isOpen={!!fullscreenVerse}
+          onClose={() => setFullscreenVerse(null)}
+          arabicText={fullscreenVerse.arabicText}
+          englishText={fullscreenVerse.englishText}
+          transliterationText={fullscreenVerse.transliterationText}
+          surahInfo={fullscreenVerse.surahInfo}
+          audioUrl={fullscreenVerse.audioUrl}
+          reflection={fullscreenVerse.reflection}
+        />
+      )}
     </div>
   );
 } 

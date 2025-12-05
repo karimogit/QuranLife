@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { storage, sanitizeInput } from '@/lib/security'
 import { quranEngine, GoalMatchResult } from '@/lib/quran-engine'
+import FullscreenVerseModal from '@/components/FullscreenVerseModal'
 
 interface Goal {
   id: string
@@ -29,6 +30,14 @@ export default function HomePage() {
   const [guidanceMap, setGuidanceMap] = useState<Record<string, GoalGuidance>>({})
   const [audioStates, setAudioStates] = useState<Record<string, { isPlaying: boolean; isLoading: boolean }>>({})
   const [textDisplayMode, setTextDisplayMode] = useState<TextDisplayMode>('english')
+  const [fullscreenVerse, setFullscreenVerse] = useState<{
+    arabicText: string;
+    englishText: string;
+    transliterationText?: string;
+    surahInfo: string;
+    audioUrl?: string;
+    reflection?: string;
+  } | null>(null)
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
   // Load goals from storage on mount
@@ -328,7 +337,7 @@ export default function HomePage() {
                                   return (
                                     <div key={idx} className="space-y-3">
                                       {/* Surah reference */}
-                                      <div className="flex items-center justify-between">
+                                      <div className="flex items-center justify-between flex-wrap gap-2">
                                         <a
                                           href={`https://quran.com/${match.verse.surah_number}/${match.verse.ayah}`}
                                           target="_blank"
@@ -338,38 +347,63 @@ export default function HomePage() {
                                           {match.verse.surah} ({match.verse.surah_number}:{match.verse.ayah})
                                         </a>
                                         
-                                        {/* Audio button */}
-                                        {match.verse.audio && (
+                                        <div className="flex items-center gap-2">
+                                          {/* Fullscreen button */}
                                           <button
-                                            onClick={() => handleAudioToggle(audioKey, match.verse.audio!)}
-                                            disabled={audioState?.isLoading}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                                              audioState?.isPlaying
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                                            } ${audioState?.isLoading ? 'opacity-50' : ''}`}
+                                            onClick={() => setFullscreenVerse({
+                                              arabicText: match.verse.text_ar,
+                                              englishText: match.verse.text_en,
+                                              transliterationText: match.verse.text_transliteration,
+                                              surahInfo: `${match.verse.surah} (${match.verse.surah_number}:${match.verse.ayah})`,
+                                              audioUrl: match.verse.audio,
+                                              reflection: match.verse.reflection
+                                            })}
+                                            className="p-1.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                                            aria-label="View verse fullscreen"
                                           >
-                                            {audioState?.isLoading ? (
-                                              <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                              </svg>
-                                            ) : audioState?.isPlaying ? (
-                                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
-                                              </svg>
-                                            ) : (
-                                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M8 5v14l11-7z"/>
-                                              </svg>
-                                            )}
-                                            {audioState?.isPlaying ? 'Pause' : 'Listen'}
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                            </svg>
                                           </button>
-                                        )}
+
+                                          {/* Audio button */}
+                                          {match.verse.audio && (
+                                            <button
+                                              onClick={() => handleAudioToggle(audioKey, match.verse.audio!)}
+                                              disabled={audioState?.isLoading}
+                                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                                audioState?.isPlaying
+                                                  ? 'bg-emerald-500 text-white'
+                                                  : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                              } ${audioState?.isLoading ? 'opacity-50' : ''}`}
+                                            >
+                                              {audioState?.isLoading ? (
+                                                <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                </svg>
+                                              ) : audioState?.isPlaying ? (
+                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                  <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                                                </svg>
+                                              ) : (
+                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                  <path d="M8 5v14l11-7z"/>
+                                                </svg>
+                                              )}
+                                              {audioState?.isPlaying ? 'Pause' : 'Listen'}
+                                            </button>
+                                          )}
+                                        </div>
                                       </div>
 
-                                      {/* Arabic text */}
-                                      <p className="text-base leading-loose text-gray-800 font-arabic text-right" dir="rtl">
+                                      {/* Arabic text with highlighting effect */}
+                                      <p 
+                                        className={`text-base leading-loose text-gray-800 font-arabic text-right transition-all duration-300 ${
+                                          audioState?.isPlaying ? 'arabic-playing' : ''
+                                        }`} 
+                                        dir="rtl"
+                                      >
                                         {match.verse.text_ar}
                                       </p>
 
@@ -444,6 +478,20 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Fullscreen Verse Modal */}
+      {fullscreenVerse && (
+        <FullscreenVerseModal
+          isOpen={!!fullscreenVerse}
+          onClose={() => setFullscreenVerse(null)}
+          arabicText={fullscreenVerse.arabicText}
+          englishText={fullscreenVerse.englishText}
+          transliterationText={fullscreenVerse.transliterationText}
+          surahInfo={fullscreenVerse.surahInfo}
+          audioUrl={fullscreenVerse.audioUrl}
+          reflection={fullscreenVerse.reflection}
+        />
+      )}
     </div>
   )
 }
