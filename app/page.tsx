@@ -35,37 +35,6 @@ export default function HomePage() {
   const currentGuidance = currentGoal ? guidanceMap[currentGoal.id] : null
   const currentVerse = currentGuidance?.guidance?.[currentVerseIndex]
 
-  // Load goals from storage on mount
-  useEffect(() => {
-    const savedGoals = storage.get<Goal[]>('quranlife-goals', [])
-    setGoals(savedGoals)
-  }, [])
-
-  // Save goals to storage when changed
-  useEffect(() => {
-    if (goals.length > 0) {
-      storage.set('quranlife-goals', goals)
-    }
-  }, [goals])
-
-  // Load guidance for current goal
-  useEffect(() => {
-    if (currentGoal && !guidanceMap[currentGoal.id]) {
-      loadGuidance(currentGoal.id, currentGoal.title)
-    }
-  }, [currentGoal?.id])
-
-  // Reset verse index when changing goals
-  useEffect(() => {
-    setCurrentVerseIndex(0)
-    // Stop audio when switching goals
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-      setIsPlaying(false)
-    }
-  }, [currentGoalIndex])
-
   const loadGuidance = useCallback(async (goalId: string, goalTitle: string) => {
     setGuidanceMap(prev => ({
       ...prev,
@@ -98,6 +67,37 @@ export default function HomePage() {
       }))
     }
   }, [])
+
+  // Load goals from storage on mount
+  useEffect(() => {
+    const savedGoals = storage.get<Goal[]>('quranlife-goals', [])
+    setGoals(savedGoals)
+  }, [])
+
+  // Save goals to storage when changed
+  useEffect(() => {
+    if (goals.length > 0) {
+      storage.set('quranlife-goals', goals)
+    }
+  }, [goals])
+
+  // Load guidance for current goal
+  useEffect(() => {
+    if (currentGoal && !guidanceMap[currentGoal.id]) {
+      loadGuidance(currentGoal.id, currentGoal.title)
+    }
+  }, [currentGoal, guidanceMap, loadGuidance])
+
+  // Reset verse index when changing goals
+  useEffect(() => {
+    setCurrentVerseIndex(0)
+    // Stop audio when switching goals
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      setIsPlaying(false)
+    }
+  }, [currentGoalIndex])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -154,15 +154,15 @@ export default function HomePage() {
     ))
   }
 
-  const navigateGoal = (direction: 'prev' | 'next') => {
+  const navigateGoal = useCallback((direction: 'prev' | 'next') => {
     if (direction === 'prev') {
       setCurrentGoalIndex(prev => prev === 0 ? goals.length - 1 : prev - 1)
     } else {
       setCurrentGoalIndex(prev => prev === goals.length - 1 ? 0 : prev + 1)
     }
-  }
+  }, [goals.length])
 
-  const navigateVerse = (direction: 'prev' | 'next') => {
+  const navigateVerse = useCallback((direction: 'prev' | 'next') => {
     const totalVerses = currentGuidance?.guidance?.length || 0
     if (totalVerses <= 1) return
     
@@ -171,7 +171,7 @@ export default function HomePage() {
     } else {
       setCurrentVerseIndex(prev => prev === totalVerses - 1 ? 0 : prev + 1)
     }
-  }
+  }, [currentGuidance?.guidance?.length])
 
   const handleAudioToggle = useCallback(async () => {
     if (!currentVerse?.verse.audio) return
@@ -231,7 +231,7 @@ export default function HomePage() {
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [showInput, goals.length, currentGuidance?.guidance?.length, currentVerse?.verse.audio, handleAudioToggle])
+  }, [showInput, goals.length, currentGuidance?.guidance, navigateGoal, navigateVerse, currentVerse?.verse.audio, handleAudioToggle])
 
   // Empty state - no goals
   if (goals.length === 0) {

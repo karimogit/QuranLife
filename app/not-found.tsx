@@ -42,11 +42,11 @@ export default function NotFound() {
           </Link>
           <div className="flex gap-3">
             <Link 
-              href="/settings"
+              href="/about"
               className="flex-1 py-3 px-4 bg-white/10 text-white/80 rounded-lg hover:bg-white/20 active:bg-white/20 transition-colors text-sm border border-white/20 touch-manipulation"
               style={{ minHeight: '44px' }}
             >
-              Settings
+              About
             </Link>
           </div>
         </div>
