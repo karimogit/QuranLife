@@ -294,7 +294,7 @@ class QuranEngine {
       
       if (curatedResults.length > 0) {
         console.log('Found curated verses:', curatedResults.length);
-        return curatedResults.slice(0, 1); // Return first curated verse
+        return curatedResults.slice(0, 5); // Return up to 5 curated verses for navigation
       }
       
       // Step 2: If curated verses failed (rare), try API search as backup
@@ -1027,7 +1027,7 @@ class QuranEngine {
         return [];
       }
 
-      return collection.verses.slice(0, 2).map(verse => ({
+      return collection.verses.slice(0, 5).map(verse => ({
         verse,
         relevanceScore: this.calculateRelevanceScore(goal, verse),
         practicalSteps: this.generatePracticalSteps(theme, goal),
@@ -1728,8 +1728,8 @@ class QuranEngine {
       // Shuffle the verses to get variety
       refs = refs.sort(() => Math.random() - 0.5);
 
-      // Fetch verses (limit to 3 for performance)
-      for (const [s, a] of refs.slice(0, 3)) {
+      // Fetch verses (limit to 5 for navigation)
+      for (const [s, a] of refs.slice(0, 5)) {
         try {
           const [verse, surah] = await Promise.all([
             quranAPI.getVerse(s, a),

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { quranEngine, GoalMatchResult } from '@/lib/quran-engine';
 import { logger } from '@/lib/logger';
+import FullscreenVerseModal from './FullscreenVerseModal';
 
 interface SmartGuidanceProps {
   goalTitle: string;
@@ -15,8 +16,16 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
   const [guidance, setGuidance] = useState<GoalMatchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [expanded, setExpanded] = useState<number | null>(null); // No items expanded by default
+  const [currentVerseIndex, setCurrentVerseIndex] = useState(0);
   const [audioStates, setAudioStates] = useState<{ [key: number]: { isPlaying: boolean; isLoading: boolean; error: string | null } }>({});
+  const [fullscreenVerse, setFullscreenVerse] = useState<{
+    arabicText: string;
+    englishText: string;
+    transliterationText?: string;
+    surahInfo: string;
+    audioUrl?: string;
+    reflection?: string;
+  } | null>(null);
   const audioRefs = useRef<{ [key: number]: HTMLAudioElement | null }>({});
 
   // Extract a simpler related term from the goal title for retry
@@ -341,130 +350,188 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
     return null;
   }
 
+  const match = guidance[currentVerseIndex];
+  const totalVerses = guidance.length;
+
+  const goToPrevVerse = () => {
+    setCurrentVerseIndex(prev => prev === 0 ? totalVerses - 1 : prev - 1);
+  };
+
+  const goToNextVerse = () => {
+    setCurrentVerseIndex(prev => prev === totalVerses - 1 ? 0 : prev + 1);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Guidance count indicator */}
-      <div className="text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          {guidance.length} Quranic guidance{guidance.length !== 1 ? 's' : ''} found
-        </div>
-      </div>
-      
-      {guidance.map((match, index) => (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          className="bg-gradient-to-br from-green-50 via-white to-blue-50 rounded-xl border border-green-100/50 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden hover:scale-[1.02] hover:border-green-200"
-        >
-          {/* Decorative corner elements */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-green-100/30 to-transparent rounded-full -translate-y-10 translate-x-10"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-blue-100/30 to-transparent rounded-full translate-y-8 -translate-x-8"></div>
-          
-          <div className="p-6 relative z-10">
-            {/* Audio element */}
-            {match.verse.audio && (
-              <audio
-                ref={(el) => { audioRefs.current[index] = el; }}
-                src={match.verse.audio}
-                onEnded={() => handleAudioEnded(index)}
-                onError={() => handleAudioError(index)}
-                preload="metadata"
-                playsInline
-                controls={false}
-                crossOrigin="anonymous"
-              />
-            )}
+      {/* Single verse card with navigation */}
+      <motion.div
+        key={currentVerseIndex}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        className="bg-gradient-to-br from-green-50 via-white to-blue-50 rounded-xl border border-green-100/50 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+      >
+        {/* Decorative corner elements */}
+        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-green-100/30 to-transparent rounded-full -translate-y-10 translate-x-10"></div>
+        <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-blue-100/30 to-transparent rounded-full translate-y-8 -translate-x-8"></div>
+        
+        <div className="p-6 relative z-10">
+          {/* Audio element */}
+          {match.verse.audio && (
+            <audio
+              ref={(el) => { audioRefs.current[currentVerseIndex] = el; }}
+              src={match.verse.audio}
+              onEnded={() => handleAudioEnded(currentVerseIndex)}
+              onError={() => handleAudioError(currentVerseIndex)}
+              preload="metadata"
+              playsInline
+              controls={false}
+              crossOrigin="anonymous"
+            />
+          )}
 
-            {/* Verse Header */}
-            <div className="flex items-center justify-between mb-4">
+          {/* Verse Header with Navigation */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              {/* Left arrow */}
+              {totalVerses > 1 && (
+                <button
+                  onClick={goToPrevVerse}
+                  className="p-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 transition-colors"
+                  aria-label="Previous verse"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+              )}
+              
               <div className="text-sm font-medium text-green-700 bg-green-100 px-3 py-1.5 rounded-full">
                 {match.verse.surah} ({match.verse.surah_number}:{match.verse.ayah})
               </div>
-              <div className="flex items-center gap-3">
-                {/* Audio Button */}
-                {match.verse.audio ? (
-                  <button
-                    onClick={() => handleAudioToggle(index)}
-                    disabled={audioStates[index]?.isLoading}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                      audioStates[index]?.isPlaying
-                        ? 'bg-green-500 text-white shadow-md hover:bg-green-600'
-                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                    } ${audioStates[index]?.isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                    title={audioStates[index]?.isPlaying ? "Pause verse recitation" : "Play verse recitation"}
-                  >
-                    {audioStates[index]?.isLoading ? (
-                      <>
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Loading...</span>
-                      </>
-                    ) : audioStates[index]?.isPlaying ? (
-                      <>
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
-                        </svg>
-                        <span>Pause</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z"/>
-                        </svg>
-                        <span>Listen</span>
-                      </>
-                    )}
-                  </button>
-                ) : null}
-              </div>
-            </div>
-
-            {/* Error Message */}
-            {audioStates[index]?.error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl shadow-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              
+              {/* Right arrow */}
+              {totalVerses > 1 && (
+                <button
+                  onClick={goToNextVerse}
+                  className="p-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 transition-colors"
+                  aria-label="Next verse"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                  <p className="text-sm text-red-700">{audioStates[index]?.error}</p>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Arabic Text */}
-            <div className="text-center mb-6 relative z-10">
-              <p className="text-xl leading-relaxed text-gray-800 mb-4 font-arabic" dir="rtl">
-                {match.verse.text_ar}
-              </p>
-              <p className="text-gray-600 leading-relaxed italic">
-                "{match.verse.text_en}"
-              </p>
+                </button>
+              )}
+              
+              {/* Verse counter */}
+              {totalVerses > 1 && (
+                <span className="text-xs text-gray-400 ml-1">
+                  {currentVerseIndex + 1}/{totalVerses}
+                </span>
+              )}
             </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Fullscreen Button */}
+              <button
+                onClick={() => setFullscreenVerse({
+                  arabicText: match.verse.text_ar,
+                  englishText: match.verse.text_en,
+                  transliterationText: match.verse.text_transliteration,
+                  surahInfo: `${match.verse.surah} (${match.verse.surah_number}:${match.verse.ayah})`,
+                  audioUrl: match.verse.audio,
+                  reflection: match.verse.reflection
+                })}
+                className="p-2 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all"
+                aria-label="View verse fullscreen"
+                title="View fullscreen"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+              </button>
 
-            {/* Reflection */}
-            <div className="border-t border-green-200 pt-4 relative z-10">
-              <p className="text-sm text-gray-700 leading-relaxed">
-                <strong className="text-green-700">How this applies to your goal: </strong>
-                {match.verse.reflection}
-              </p>
+              {/* Audio Button */}
+              {match.verse.audio ? (
+                <button
+                  onClick={() => handleAudioToggle(currentVerseIndex)}
+                  disabled={audioStates[currentVerseIndex]?.isLoading}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    audioStates[currentVerseIndex]?.isPlaying
+                      ? 'bg-green-500 text-white shadow-md hover:bg-green-600'
+                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  } ${audioStates[currentVerseIndex]?.isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  title={audioStates[currentVerseIndex]?.isPlaying ? "Pause verse recitation" : "Play verse recitation"}
+                >
+                  {audioStates[currentVerseIndex]?.isLoading ? (
+                    <>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Loading...</span>
+                    </>
+                  ) : audioStates[currentVerseIndex]?.isPlaying ? (
+                    <>
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                      </svg>
+                      <span>Pause</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                      <span>Listen</span>
+                    </>
+                  )}
+                </button>
+              ) : null}
             </div>
-
-
-
           </div>
-        </motion.div>
-      ))}
+
+          {/* Error Message */}
+          {audioStates[currentVerseIndex]?.error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl shadow-sm"
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <p className="text-sm text-red-700">{audioStates[currentVerseIndex]?.error}</p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Arabic Text with highlighting effect */}
+          <div className="text-center mb-6 relative z-10">
+            <p 
+              className={`text-xl leading-relaxed text-gray-800 mb-4 font-arabic transition-all duration-300 ${
+                audioStates[currentVerseIndex]?.isPlaying ? 'arabic-playing' : ''
+              }`} 
+              dir="rtl"
+            >
+              {match.verse.text_ar}
+            </p>
+            <p className="text-gray-600 leading-relaxed italic">
+              "{match.verse.text_en}"
+            </p>
+          </div>
+
+          {/* Reflection */}
+          <div className="border-t border-green-200 pt-4 relative z-10">
+            <p className="text-sm text-gray-700 leading-relaxed">
+              <strong className="text-green-700">How this applies to your goal: </strong>
+              {match.verse.reflection}
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Load More Button */}
       <div className="text-center mt-8">
@@ -492,7 +559,19 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
         </button>
       </div>
 
-
+      {/* Fullscreen Verse Modal */}
+      {fullscreenVerse && (
+        <FullscreenVerseModal
+          isOpen={!!fullscreenVerse}
+          onClose={() => setFullscreenVerse(null)}
+          arabicText={fullscreenVerse.arabicText}
+          englishText={fullscreenVerse.englishText}
+          transliterationText={fullscreenVerse.transliterationText}
+          surahInfo={fullscreenVerse.surahInfo}
+          audioUrl={fullscreenVerse.audioUrl}
+          reflection={fullscreenVerse.reflection}
+        />
+      )}
     </div>
   );
 } 

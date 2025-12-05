@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { storage, sanitizeInput } from '@/lib/security'
 import { quranEngine, GoalMatchResult } from '@/lib/quran-engine'
+import FullscreenVerseModal from '@/components/FullscreenVerseModal'
 
 interface Goal {
   id: string
@@ -29,6 +30,15 @@ export default function HomePage() {
   const [guidanceMap, setGuidanceMap] = useState<Record<string, GoalGuidance>>({})
   const [audioStates, setAudioStates] = useState<Record<string, { isPlaying: boolean; isLoading: boolean }>>({})
   const [textDisplayMode, setTextDisplayMode] = useState<TextDisplayMode>('english')
+  const [fullscreenVerse, setFullscreenVerse] = useState<{
+    arabicText: string;
+    englishText: string;
+    transliterationText?: string;
+    surahInfo: string;
+    audioUrl?: string;
+    reflection?: string;
+  } | null>(null)
+  const [verseIndexMap, setVerseIndexMap] = useState<Record<string, number>>({})
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
   // Load goals from storage on mount
@@ -320,15 +330,34 @@ export default function HomePage() {
                                 <span className="ml-2 text-sm text-gray-500">Finding guidance...</span>
                               </div>
                             ) : guidance?.guidance?.length > 0 ? (
-                              <div className="space-y-4">
-                                {guidance.guidance.slice(0, 1).map((match, idx) => {
-                                  const audioKey = `${goal.id}-${idx}`
-                                  const audioState = audioStates[audioKey]
-                                  
-                                  return (
-                                    <div key={idx} className="space-y-3">
-                                      {/* Surah reference */}
-                                      <div className="flex items-center justify-between">
+                              (() => {
+                                const currentIndex = verseIndexMap[goal.id] || 0
+                                const totalVerses = guidance.guidance.length
+                                const match = guidance.guidance[currentIndex]
+                                const audioKey = `${goal.id}-${currentIndex}`
+                                const audioState = audioStates[audioKey]
+                                
+                                return (
+                                  <div className="space-y-3">
+                                    {/* Surah reference with navigation arrows */}
+                                    <div className="flex items-center justify-between flex-wrap gap-2">
+                                      <div className="flex items-center gap-2">
+                                        {/* Left arrow */}
+                                        {totalVerses > 1 && (
+                                          <button
+                                            onClick={() => setVerseIndexMap(prev => ({
+                                              ...prev,
+                                              [goal.id]: currentIndex === 0 ? totalVerses - 1 : currentIndex - 1
+                                            }))}
+                                            className="p-1 rounded-full bg-gray-100 text-gray-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors"
+                                            aria-label="Previous verse"
+                                          >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                          </button>
+                                        )}
+                                        
                                         <a
                                           href={`https://quran.com/${match.verse.surah_number}/${match.verse.ayah}`}
                                           target="_blank"
@@ -338,6 +367,49 @@ export default function HomePage() {
                                           {match.verse.surah} ({match.verse.surah_number}:{match.verse.ayah})
                                         </a>
                                         
+                                        {/* Right arrow */}
+                                        {totalVerses > 1 && (
+                                          <button
+                                            onClick={() => setVerseIndexMap(prev => ({
+                                              ...prev,
+                                              [goal.id]: currentIndex === totalVerses - 1 ? 0 : currentIndex + 1
+                                            }))}
+                                            className="p-1 rounded-full bg-gray-100 text-gray-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors"
+                                            aria-label="Next verse"
+                                          >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                          </button>
+                                        )}
+                                        
+                                        {/* Verse counter */}
+                                        {totalVerses > 1 && (
+                                          <span className="text-xs text-gray-400 ml-1">
+                                            {currentIndex + 1}/{totalVerses}
+                                          </span>
+                                        )}
+                                      </div>
+                                      
+                                      <div className="flex items-center gap-2">
+                                        {/* Fullscreen button */}
+                                        <button
+                                          onClick={() => setFullscreenVerse({
+                                            arabicText: match.verse.text_ar,
+                                            englishText: match.verse.text_en,
+                                            transliterationText: match.verse.text_transliteration,
+                                            surahInfo: `${match.verse.surah} (${match.verse.surah_number}:${match.verse.ayah})`,
+                                            audioUrl: match.verse.audio,
+                                            reflection: match.verse.reflection
+                                          })}
+                                          className="p-1.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                                          aria-label="View verse fullscreen"
+                                        >
+                                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                          </svg>
+                                        </button>
+
                                         {/* Audio button */}
                                         {match.verse.audio && (
                                           <button
@@ -367,54 +439,59 @@ export default function HomePage() {
                                           </button>
                                         )}
                                       </div>
-
-                                      {/* Arabic text */}
-                                      <p className="text-base leading-loose text-gray-800 font-arabic text-right" dir="rtl">
-                                        {match.verse.text_ar}
-                                      </p>
-
-                                      {/* Toggle for English/Phonetic */}
-                                      <div className="flex items-center justify-center gap-1 py-2">
-                                        <button
-                                          onClick={() => setTextDisplayMode('english')}
-                                          className={`px-3 py-1 text-xs font-medium rounded-l-full transition-all ${
-                                            textDisplayMode === 'english'
-                                              ? 'bg-emerald-500 text-white'
-                                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                          }`}
-                                        >
-                                          English
-                                        </button>
-                                        <button
-                                          onClick={() => setTextDisplayMode('phonetic')}
-                                          className={`px-3 py-1 text-xs font-medium rounded-r-full transition-all ${
-                                            textDisplayMode === 'phonetic'
-                                              ? 'bg-emerald-500 text-white'
-                                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                          }`}
-                                        >
-                                          Phonetic
-                                        </button>
-                                      </div>
-
-                                      {/* English translation or Phonetic */}
-                                      <p className="text-sm text-gray-600 italic leading-relaxed">
-                                        {textDisplayMode === 'phonetic' && match.verse.text_transliteration
-                                          ? match.verse.text_transliteration
-                                          : `"${match.verse.text_en}"`}
-                                      </p>
-
-                                      {/* Reflection */}
-                                      {match.verse.reflection && (
-                                        <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">
-                                          <span className="font-medium text-emerald-600">How this applies: </span>
-                                          {match.verse.reflection}
-                                        </p>
-                                      )}
                                     </div>
-                                  )
-                                })}
-                              </div>
+
+                                    {/* Arabic text with highlighting effect */}
+                                    <p 
+                                      className={`text-base leading-loose text-gray-800 font-arabic text-right transition-all duration-300 ${
+                                        audioState?.isPlaying ? 'arabic-playing' : ''
+                                      }`} 
+                                      dir="rtl"
+                                    >
+                                      {match.verse.text_ar}
+                                    </p>
+
+                                    {/* Toggle for English/Phonetic */}
+                                    <div className="flex items-center justify-center gap-1 py-2">
+                                      <button
+                                        onClick={() => setTextDisplayMode('english')}
+                                        className={`px-3 py-1 text-xs font-medium rounded-l-full transition-all ${
+                                          textDisplayMode === 'english'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                      >
+                                        English
+                                      </button>
+                                      <button
+                                        onClick={() => setTextDisplayMode('phonetic')}
+                                        className={`px-3 py-1 text-xs font-medium rounded-r-full transition-all ${
+                                          textDisplayMode === 'phonetic'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                        }`}
+                                      >
+                                        Phonetic
+                                      </button>
+                                    </div>
+
+                                    {/* English translation or Phonetic */}
+                                    <p className="text-sm text-gray-600 italic leading-relaxed">
+                                      {textDisplayMode === 'phonetic' && match.verse.text_transliteration
+                                        ? match.verse.text_transliteration
+                                        : `"${match.verse.text_en}"`}
+                                    </p>
+
+                                    {/* Reflection */}
+                                    {match.verse.reflection && (
+                                      <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">
+                                        <span className="font-medium text-emerald-600">How this applies: </span>
+                                        {match.verse.reflection}
+                                      </p>
+                                    )}
+                                  </div>
+                                )
+                              })()
                             ) : (
                               <p className="text-sm text-gray-500 text-center py-2">
                                 No guidance found for this goal.
@@ -444,6 +521,20 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Fullscreen Verse Modal */}
+      {fullscreenVerse && (
+        <FullscreenVerseModal
+          isOpen={!!fullscreenVerse}
+          onClose={() => setFullscreenVerse(null)}
+          arabicText={fullscreenVerse.arabicText}
+          englishText={fullscreenVerse.englishText}
+          transliterationText={fullscreenVerse.transliterationText}
+          surahInfo={fullscreenVerse.surahInfo}
+          audioUrl={fullscreenVerse.audioUrl}
+          reflection={fullscreenVerse.reflection}
+        />
+      )}
     </div>
   )
 }
