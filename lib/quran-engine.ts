@@ -281,7 +281,7 @@ class QuranEngine {
     try {
       console.log('Finding verses for goal using AI:', goal);
       
-      // Call the AI API to get semantically relevant verse references
+      // Call the AI API to get semantically relevant verse references with explanations
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -295,7 +295,7 @@ class QuranEngine {
       }
 
       const aiResult = await response.json();
-      const verseRefs: Array<{ surah: number; ayah: number }> = aiResult.verses || [];
+      const verseRefs: Array<{ surah: number; ayah: number; explanation: string }> = aiResult.verses || [];
       console.log('AI recommended verses:', verseRefs);
 
       if (verseRefs.length === 0) {
@@ -324,6 +324,11 @@ class QuranEngine {
           });
 
           if (quranVerse) {
+            // Use AI-generated explanation if available, otherwise fallback to template
+            if (ref.explanation && ref.explanation.trim().length > 0) {
+              quranVerse.reflection = ref.explanation;
+            }
+            
             matches.push({
               verse: quranVerse,
               relevanceScore: 0.9,
