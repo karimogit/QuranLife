@@ -263,35 +263,24 @@ export default function VerseCard({ verse }: VerseCardProps) {
           {verse.text_ar}
         </p>
         
-        {/* Toggle for English/Phonetic */}
-        <div className="flex items-center justify-center gap-1 py-2">
-          <button
-            onClick={() => setTextDisplayMode('english')}
-            className={`px-3 py-1 text-xs font-medium rounded-l-full transition-all ${
-              textDisplayMode === 'english'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            English
-          </button>
-          <button
-            onClick={() => setTextDisplayMode('phonetic')}
-            className={`px-3 py-1 text-xs font-medium rounded-r-full transition-all ${
-              textDisplayMode === 'phonetic'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            Phonetic
-          </button>
-        </div>
-
+        {/* English translation */}
         <p className="text-gray-600 leading-relaxed italic">
-          {textDisplayMode === 'phonetic' && verse.text_transliteration
-            ? verse.text_transliteration
-            : `"${verse.text_en}"`}
+          "{verse.text_en}"
         </p>
+
+        {/* Phonetic/Transliteration */}
+        {verse.text_transliteration && (
+          <>
+            <div className="my-3 flex items-center justify-center gap-3">
+              <div className="h-px w-12 bg-gray-200"></div>
+              <span className="text-xs text-gray-400 uppercase tracking-wider">Phonetic</span>
+              <div className="h-px w-12 bg-gray-200"></div>
+            </div>
+            <p className="text-gray-500 leading-relaxed text-sm">
+              {verse.text_transliteration}
+            </p>
+          </>
+        )}
       </div>
 
       <div className="border-t border-green-200 pt-4 relative z-10">

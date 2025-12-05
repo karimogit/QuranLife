@@ -184,48 +184,36 @@ export default function FullscreenVerseModal({
               </p>
             </motion.div>
 
-            {/* Toggle for English/Phonetic */}
+            {/* English translation */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.35 }}
-              className="flex items-center justify-center gap-1 mb-4"
-            >
-              <button
-                onClick={() => setTextDisplayMode('english')}
-                className={`px-4 py-2 text-sm font-medium rounded-l-full transition-all ${
-                  textDisplayMode === 'english'
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                English
-              </button>
-              <button
-                onClick={() => setTextDisplayMode('phonetic')}
-                className={`px-4 py-2 text-sm font-medium rounded-r-full transition-all ${
-                  textDisplayMode === 'phonetic'
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                Phonetic
-              </button>
-            </motion.div>
-
-            {/* Translation or transliteration */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="max-w-3xl text-center mb-8"
+              className="max-w-3xl text-center mb-6"
             >
               <p className="text-lg md:text-2xl lg:text-3xl text-white/80 italic leading-relaxed">
-                {textDisplayMode === 'phonetic' && transliterationText
-                  ? transliterationText
-                  : `"${englishText}"`}
+                "{englishText}"
               </p>
             </motion.div>
+
+            {/* Phonetic/Transliteration */}
+            {transliterationText && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="max-w-3xl text-center mb-8"
+              >
+                <div className="mb-4 flex items-center justify-center gap-4">
+                  <div className="h-px w-16 bg-white/20"></div>
+                  <span className="text-xs text-white/40 uppercase tracking-wider">Phonetic</span>
+                  <div className="h-px w-16 bg-white/20"></div>
+                </div>
+                <p className="text-base md:text-xl lg:text-2xl text-white/60 leading-relaxed">
+                  {transliterationText}
+                </p>
+              </motion.div>
+            )}
 
             {/* Reflection */}
             {reflection && (
