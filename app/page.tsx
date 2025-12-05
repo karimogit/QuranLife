@@ -236,12 +236,12 @@ export default function HomePage() {
   // Empty state - no goals
   if (goals.length === 0) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
+      <div className="min-h-[calc(100vh-4rem)] flex items-start md:items-center justify-center px-4 pt-12 md:pt-0">
         <div className="max-w-md w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
+            className="text-center mb-6"
           >
             <h1 className="text-xl md:text-2xl font-semibold text-white whitespace-nowrap">
               What do you want to grow towards?
