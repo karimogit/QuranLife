@@ -11,7 +11,7 @@ const STATIC_CACHE = 'quranlife-static-v2';
 const CACHE_ASSETS = [
   '/',
   '/habits', 
-  '/settings',
+  '/about',
   '/privacy',
   '/terms',
   '/manifest.json',
