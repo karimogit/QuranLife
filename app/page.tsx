@@ -249,53 +249,56 @@ export default function HomePage() {
                     {/* Goal Card */}
                     <div className="p-4">
                       <div className="flex items-start gap-3">
-                        {/* Completion checkbox */}
+                        {/* Completion checkbox - larger touch target for mobile */}
                         <button
                           onClick={() => handleToggleComplete(goal.id)}
-                          className={`flex-shrink-0 w-5 h-5 mt-0.5 rounded border-2 flex items-center justify-center transition-all ${
+                          className={`flex-shrink-0 w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all touch-manipulation ${
                             goal.completed
                               ? 'bg-emerald-500 border-emerald-500 text-white'
-                              : 'border-white/40 hover:border-emerald-400'
+                              : 'border-white/40 hover:border-emerald-400 active:border-emerald-400'
                           }`}
+                          style={{ minWidth: '28px', minHeight: '28px' }}
                         >
                           {goal.completed && (
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           )}
                         </button>
 
                         {/* Goal title */}
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm md:text-base font-medium break-words ${
+                        <div className="flex-1 min-w-0 py-0.5">
+                          <p className={`text-base font-medium break-words leading-snug ${
                             goal.completed ? 'text-white/40 line-through' : 'text-white'
                           }`}>
                             {goal.title}
                           </p>
                         </div>
 
-                        {/* Delete button */}
+                        {/* Delete button - larger touch target */}
                         <button
                           onClick={() => handleRemoveGoal(goal.id)}
-                          className="flex-shrink-0 p-1 text-white/40 hover:text-red-400 transition-colors"
+                          className="flex-shrink-0 p-2 -m-1 text-white/40 hover:text-red-400 active:text-red-400 transition-colors touch-manipulation"
                           title="Remove goal"
+                          style={{ minWidth: '36px', minHeight: '36px' }}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       </div>
 
-                      {/* Show Surah Button */}
+                      {/* Show Surah Button - proper touch target */}
                       <button
                         onClick={() => toggleGuidance(goal.id, goal.title)}
-                        className={`mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all touch-manipulation ${
                           isShowingGuidance
                             ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/50'
-                            : 'bg-white/10 text-white/70 hover:bg-emerald-500/20 hover:text-emerald-300 border border-white/10'
+                            : 'bg-white/10 text-white/70 hover:bg-emerald-500/20 active:bg-emerald-500/20 hover:text-emerald-300 border border-white/10'
                         }`}
+                        style={{ minHeight: '44px' }}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                         {isShowingGuidance ? 'Hide Surah' : 'Related Surah'}
@@ -328,17 +331,18 @@ export default function HomePage() {
                                 return (
                                   <div className="space-y-4">
                                     {/* Surah reference with navigation arrows */}
-                                    <div className="flex items-center justify-between flex-wrap gap-2">
-                                      <div className="flex items-center gap-2">
-                                        {/* Left arrow */}
+                                    <div className="flex items-center justify-between flex-wrap gap-3">
+                                      <div className="flex items-center gap-1">
+                                        {/* Left arrow - larger touch target */}
                                         {totalVerses > 1 && (
                                           <button
                                             onClick={() => setVerseIndexMap(prev => ({
                                               ...prev,
                                               [goal.id]: currentIndex === 0 ? totalVerses - 1 : currentIndex - 1
                                             }))}
-                                            className="p-1 rounded-full bg-white/10 text-white/60 hover:bg-emerald-500/30 hover:text-emerald-300 transition-colors"
+                                            className="p-2 rounded-full bg-white/10 text-white/60 hover:bg-emerald-500/30 active:bg-emerald-500/30 hover:text-emerald-300 transition-colors touch-manipulation"
                                             aria-label="Previous verse"
+                                            style={{ minWidth: '36px', minHeight: '36px' }}
                                           >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -350,20 +354,21 @@ export default function HomePage() {
                                           href={`https://quran.com/${match.verse.surah_number}/${match.verse.ayah}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="text-xs font-medium text-emerald-300 bg-emerald-500/20 px-2 py-1 rounded-full hover:bg-emerald-500/30 transition-colors border border-emerald-500/30"
+                                          className="text-xs font-medium text-emerald-300 bg-emerald-500/20 px-3 py-1.5 rounded-full hover:bg-emerald-500/30 active:bg-emerald-500/30 transition-colors border border-emerald-500/30 touch-manipulation"
                                         >
                                           {match.verse.surah} ({match.verse.surah_number}:{match.verse.ayah})
                                         </a>
                                         
-                                        {/* Right arrow */}
+                                        {/* Right arrow - larger touch target */}
                                         {totalVerses > 1 && (
                                           <button
                                             onClick={() => setVerseIndexMap(prev => ({
                                               ...prev,
                                               [goal.id]: currentIndex === totalVerses - 1 ? 0 : currentIndex + 1
                                             }))}
-                                            className="p-1 rounded-full bg-white/10 text-white/60 hover:bg-emerald-500/30 hover:text-emerald-300 transition-colors"
+                                            className="p-2 rounded-full bg-white/10 text-white/60 hover:bg-emerald-500/30 active:bg-emerald-500/30 hover:text-emerald-300 transition-colors touch-manipulation"
                                             aria-label="Next verse"
+                                            style={{ minWidth: '36px', minHeight: '36px' }}
                                           >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -379,29 +384,30 @@ export default function HomePage() {
                                         )}
                                       </div>
                                       
-                                      <div className="flex items-center gap-2">
-                                        {/* Audio button */}
+                                      <div className="flex items-center">
+                                        {/* Audio button - proper touch target */}
                                         {match.verse.audio && (
                                           <button
                                             onClick={() => handleAudioToggle(audioKey, match.verse.audio!)}
                                             disabled={audioState?.isLoading}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all touch-manipulation ${
                                               audioState?.isPlaying
                                                 ? 'bg-emerald-500 text-white'
-                                                : 'bg-white/10 text-white/70 hover:bg-emerald-500/30 hover:text-emerald-300 border border-white/20'
+                                                : 'bg-white/10 text-white/70 hover:bg-emerald-500/30 active:bg-emerald-500/30 hover:text-emerald-300 border border-white/20'
                                             } ${audioState?.isLoading ? 'opacity-50' : ''}`}
+                                            style={{ minHeight: '40px' }}
                                           >
                                             {audioState?.isLoading ? (
-                                              <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                               </svg>
                                             ) : audioState?.isPlaying ? (
-                                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
                                               </svg>
                                             ) : (
-                                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M8 5v14l11-7z"/>
                                               </svg>
                                             )}
@@ -413,26 +419,26 @@ export default function HomePage() {
 
                                     {/* Arabic text */}
                                     <p 
-                                      className="text-xl md:text-2xl leading-loose text-white font-arabic text-right"
+                                      className="text-2xl md:text-3xl leading-relaxed md:leading-loose text-white font-arabic text-center py-2"
                                       dir="rtl"
                                     >
                                       {match.verse.text_ar}
                                     </p>
 
                                     {/* English translation */}
-                                    <p className="text-sm md:text-base text-white/80 italic leading-relaxed">
+                                    <p className="text-base md:text-lg text-white/80 italic leading-relaxed text-center">
                                       "{match.verse.text_en}"
                                     </p>
 
                                     {/* Phonetic/Transliteration */}
                                     {match.verse.text_transliteration && (
                                       <>
-                                        <div className="flex items-center justify-center gap-3">
-                                          <div className="h-px w-12 bg-white/20"></div>
-                                          <span className="text-xs text-white/40 uppercase tracking-wider">Phonetic</span>
-                                          <div className="h-px w-12 bg-white/20"></div>
+                                        <div className="flex items-center justify-center gap-3 py-1">
+                                          <div className="h-px w-10 bg-white/20"></div>
+                                          <span className="text-[10px] text-white/40 uppercase tracking-wider">Phonetic</span>
+                                          <div className="h-px w-10 bg-white/20"></div>
                                         </div>
-                                        <p className="text-sm text-white/60 leading-relaxed">
+                                        <p className="text-sm md:text-base text-white/60 leading-relaxed text-center">
                                           {match.verse.text_transliteration}
                                         </p>
                                       </>
@@ -440,7 +446,7 @@ export default function HomePage() {
 
                                     {/* Reflection */}
                                     {match.verse.reflection && (
-                                      <p className="text-xs text-emerald-300/70 pt-3 border-t border-white/10">
+                                      <p className="text-sm text-emerald-300/70 pt-4 mt-2 border-t border-white/10">
                                         <span className="font-medium text-emerald-300">How this applies: </span>
                                         {match.verse.reflection}
                                       </p>
