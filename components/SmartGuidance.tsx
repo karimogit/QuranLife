@@ -492,6 +492,16 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
             </div>
           </div>
 
+          {/* Reflection - How this applies to your goal */}
+          {match.verse.reflection && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl relative z-10">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                <strong className="text-green-700">How this applies to your goal: </strong>
+                {match.verse.reflection}
+              </p>
+            </div>
+          )}
+
           {/* Error Message */}
           {audioStates[currentVerseIndex]?.error && (
             <motion.div
@@ -520,14 +530,6 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
             </p>
             <p className="text-gray-600 leading-relaxed italic">
               "{match.verse.text_en}"
-            </p>
-          </div>
-
-          {/* Reflection */}
-          <div className="border-t border-green-200 pt-4 relative z-10">
-            <p className="text-sm text-gray-700 leading-relaxed">
-              <strong className="text-green-700">How this applies to your goal: </strong>
-              {match.verse.reflection}
             </p>
           </div>
         </div>
