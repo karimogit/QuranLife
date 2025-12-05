@@ -3,17 +3,6 @@ import type { NextRequest } from 'next/server';
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
 
-interface VerseRecommendation {
-  surah: number;
-  ayah: number;
-  reason: string;
-}
-
-interface AIResponse {
-  verses: VerseRecommendation[];
-  theme: string;
-}
-
 export async function POST(req: NextRequest): Promise<Response> {
   try {
     const { goal } = await req.json();
@@ -34,28 +23,18 @@ export async function POST(req: NextRequest): Promise<Response> {
       });
     }
 
-    const systemPrompt = `You are a knowledgeable Islamic scholar assistant. Your task is to recommend the most relevant Quranic verses for a user's personal goal or life situation.
+    const systemPrompt = `You are a Quran scholar. Given a user's goal, return 3-5 relevant Quranic verse references.
 
-Given a user's goal, return 3-5 Quranic verses that provide guidance, inspiration, or wisdom relevant to their situation.
+PLAIN OUTPUT ONLY. One verse per line in format: surah:ayah
+Example:
+2:286
+13:11
+94:5
 
-You must respond with valid JSON in this exact format:
-{
-  "theme": "the main Islamic theme (e.g., patience, gratitude, trust, success, family, etc.)",
-  "verses": [
-    {
-      "surah": <surah number 1-114>,
-      "ayah": <ayah number>,
-      "reason": "<brief explanation of why this verse is relevant>"
-    }
-  ]
-}
-
-Important guidelines:
-- Only recommend verses that genuinely relate to the goal
-- Prefer well-known, impactful verses when appropriate
-- Consider both literal and thematic connections
-- Include verses that offer practical guidance, not just abstract concepts
-- Ensure surah and ayah numbers are accurate (Surah 1 has 7 ayahs, Surah 2 has 286, etc.)`;
+Rules:
+- Only valid surah numbers (1-114) and ayah numbers
+- Choose verses that genuinely relate to the goal
+- No explanations, no extra text, just the references`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -67,10 +46,10 @@ Important guidelines:
         model: 'gpt-4.1-nano',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Find relevant Quranic verses for this goal: "${goal}"` }
+          { role: 'user', content: goal }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 100
       })
     });
 
@@ -84,7 +63,7 @@ Important guidelines:
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+    const content = data.choices?.[0]?.message?.content?.trim();
 
     if (!content) {
       return new Response(JSON.stringify({ error: 'Empty response from AI' }), {
@@ -93,44 +72,30 @@ Important guidelines:
       });
     }
 
-    // Parse the JSON response from GPT
-    let aiResponse: AIResponse;
-    try {
-      // Extract JSON from the response (handle potential markdown code blocks)
-      let jsonStr = content;
-      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (jsonMatch) {
-        jsonStr = jsonMatch[1];
+    // Parse plain text response: one "surah:ayah" per line
+    const lines = content.split('\n').map((l: string) => l.trim()).filter((l: string) => l);
+    const verses: Array<{ surah: number; ayah: number }> = [];
+
+    for (const line of lines) {
+      const match = line.match(/^(\d+):(\d+)$/);
+      if (match) {
+        const surah = parseInt(match[1], 10);
+        const ayah = parseInt(match[2], 10);
+        if (surah >= 1 && surah <= 114 && ayah >= 1) {
+          verses.push({ surah, ayah });
+        }
       }
-      aiResponse = JSON.parse(jsonStr.trim());
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', content, parseError);
-      return new Response(JSON.stringify({ error: 'Invalid AI response format', raw: content }), {
+    }
+
+    if (verses.length === 0) {
+      console.error('No valid verses parsed from AI response:', content);
+      return new Response(JSON.stringify({ error: 'No valid verses returned', raw: content }), {
         status: 500,
         headers: { 'content-type': 'application/json' }
       });
     }
 
-    // Validate the response structure
-    if (!aiResponse.verses || !Array.isArray(aiResponse.verses)) {
-      return new Response(JSON.stringify({ error: 'Invalid verse recommendations' }), {
-        status: 500,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    // Validate and filter verse references
-    const validVerses = aiResponse.verses.filter(v => 
-      typeof v.surah === 'number' && 
-      typeof v.ayah === 'number' && 
-      v.surah >= 1 && v.surah <= 114 &&
-      v.ayah >= 1
-    );
-
-    return new Response(JSON.stringify({
-      theme: aiResponse.theme || 'guidance',
-      verses: validVerses
-    }), {
+    return new Response(JSON.stringify({ verses }), {
       status: 200,
       headers: { 'content-type': 'application/json' }
     });

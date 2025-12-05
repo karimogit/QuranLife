@@ -281,7 +281,7 @@ class QuranEngine {
     try {
       console.log('Finding verses for goal using AI:', goal);
       
-      // Call the AI API to get semantically relevant verses
+      // Call the AI API to get semantically relevant verse references
       const response = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -295,14 +295,16 @@ class QuranEngine {
       }
 
       const aiResult = await response.json();
-      console.log('AI recommended verses:', aiResult);
-
-      const theme = aiResult.theme || 'guidance';
-      const verseRefs: Array<{ surah: number; ayah: number; reason: string }> = aiResult.verses || [];
+      const verseRefs: Array<{ surah: number; ayah: number }> = aiResult.verses || [];
+      console.log('AI recommended verses:', verseRefs);
 
       if (verseRefs.length === 0) {
         throw new Error('No verses returned from AI');
       }
+
+      // Determine theme from goal keywords for practical guidance
+      const keywords = this.extractKeywords(goal);
+      const theme = this.determineTheme(keywords);
 
       // Fetch the actual verse data for each recommendation
       const matches: GoalMatchResult[] = [];
@@ -318,18 +320,13 @@ class QuranEngine {
             verse,
             surah,
             theme,
-            context: ref.reason || `Guidance for: ${goal}`
+            context: `Guidance for: ${goal}`
           });
 
           if (quranVerse) {
-            // Override the reflection with AI's reason for better relevance display
-            if (ref.reason) {
-              quranVerse.reflection = ref.reason;
-            }
-            
             matches.push({
               verse: quranVerse,
-              relevanceScore: 0.9, // AI-matched verses are highly relevant
+              relevanceScore: 0.9,
               practicalSteps: this.generatePracticalSteps(theme, goal),
               duaRecommendation: DUA_RECOMMENDATIONS[theme],
               relatedHabits: this.getRelatedHabits(theme)
@@ -337,7 +334,6 @@ class QuranEngine {
           }
         } catch (verseError) {
           console.error(`Error fetching verse ${ref.surah}:${ref.ayah}:`, verseError);
-          // Continue with other verses
         }
       }
 
@@ -346,12 +342,11 @@ class QuranEngine {
         return matches;
       }
 
-      // If all verse fetches failed, throw to trigger error handling
       throw new Error('Failed to fetch any recommended verses');
 
     } catch (error) {
       console.error('Error finding verses for goal:', error);
-      throw error; // No fallback - let the error propagate
+      throw error;
     }
   }
 
