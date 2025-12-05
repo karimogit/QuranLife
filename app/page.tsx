@@ -30,6 +30,7 @@ export default function HomePage() {
   const [isAudioLoading, setIsAudioLoading] = useState(false)
   const [showInput, setShowInput] = useState(false)
   const [fontSize, setFontSize] = useState(1) // 0 = small, 1 = medium, 2 = large
+  const [isInputFocused, setIsInputFocused] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const currentGoal = goals[currentGoalIndex]
@@ -286,16 +287,28 @@ export default function HomePage() {
             onSubmit={handleSubmit}
             className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6"
           >
-            <input
-              id="goal"
-              type="text"
-              autoComplete="off"
-              autoFocus
-              placeholder="e.g. Read Quran daily, Find inner peace..."
-              value={goalTitle}
-              onChange={e => setGoalTitle(e.target.value)}
-              className="w-full rounded-xl border border-white/20 bg-white/10 px-5 py-4 text-lg text-white placeholder-white/50 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 mb-4"
-            />
+            <div className="relative mb-4">
+              <input
+                id="goal"
+                type="text"
+                autoComplete="off"
+                autoFocus
+                value={goalTitle}
+                onChange={e => setGoalTitle(e.target.value)}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
+                className="w-full rounded-xl border border-white/20 bg-white/10 px-5 py-4 text-lg text-white focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
+              />
+              {/* Animated scrolling placeholder */}
+              {!goalTitle && !isInputFocused && (
+                <div className="absolute inset-0 flex items-center px-5 pointer-events-none overflow-hidden rounded-xl">
+                  <div className="animate-marquee whitespace-nowrap text-lg text-white/50">
+                    <span>e.g. Read Quran daily, Find inner peace, Be more patient, Improve my prayers, Build better habits, Learn Arabic, Wake up for Fajr</span>
+                    <span>e.g. Read Quran daily, Find inner peace, Be more patient, Improve my prayers, Build better habits, Learn Arabic, Wake up for Fajr</span>
+                  </div>
+                </div>
+              )}
+            </div>
             <button
               type="submit"
               disabled={isSaving}
