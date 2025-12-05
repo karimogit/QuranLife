@@ -29,11 +29,31 @@ export default function HomePage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isAudioLoading, setIsAudioLoading] = useState(false)
   const [showInput, setShowInput] = useState(false)
+  const [fontSize, setFontSize] = useState(1) // 0 = small, 1 = medium, 2 = large
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const currentGoal = goals[currentGoalIndex]
   const currentGuidance = currentGoal ? guidanceMap[currentGoal.id] : null
   const currentVerse = currentGuidance?.guidance?.[currentVerseIndex]
+
+  // Font size classes for different elements
+  const fontSizeClasses = {
+    arabic: [
+      'text-2xl md:text-3xl lg:text-4xl',      // small
+      'text-3xl md:text-4xl lg:text-5xl',      // medium (default)
+      'text-4xl md:text-5xl lg:text-6xl',      // large
+    ],
+    english: [
+      'text-base md:text-lg lg:text-xl',       // small
+      'text-lg md:text-xl lg:text-2xl',        // medium (default)
+      'text-xl md:text-2xl lg:text-3xl',       // large
+    ],
+    transliteration: [
+      'text-sm md:text-base lg:text-lg',       // small
+      'text-base md:text-lg lg:text-xl',       // medium (default)
+      'text-lg md:text-xl lg:text-2xl',        // large
+    ],
+  }
 
   const loadGuidance = useCallback(async (goalId: string, goalTitle: string) => {
     setGuidanceMap(prev => ({
@@ -74,12 +94,23 @@ export default function HomePage() {
     setGoals(savedGoals)
   }, [])
 
+  // Load font size from storage on mount
+  useEffect(() => {
+    const savedFontSize = storage.get<number>('quranlife-fontsize', 1)
+    setFontSize(savedFontSize)
+  }, [])
+
   // Save goals to storage when changed
   useEffect(() => {
     if (goals.length > 0) {
       storage.set('quranlife-goals', goals)
     }
   }, [goals])
+
+  // Save font size to storage when changed
+  useEffect(() => {
+    storage.set('quranlife-fontsize', fontSize)
+  }, [fontSize])
 
   // Load guidance for current goal
   useEffect(() => {
@@ -395,12 +426,12 @@ export default function HomePage() {
             {/* Verse display */}
             {!currentGuidance?.loading && currentVerse && (
               <>
-                {/* Surah reference */}
+                {/* Surah reference with font size controls */}
                 <motion.div
                   initial={{ y: -10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.15 }}
-                  className="mb-6 md:mb-8"
+                  className="mb-6 md:mb-8 flex items-center justify-center gap-3"
                 >
                   <a
                     href={`https://quran.com/${currentVerse.verse.surah_number}/${currentVerse.verse.ayah}`}
@@ -410,9 +441,33 @@ export default function HomePage() {
                   >
                     {currentVerse.verse.surah} ({currentVerse.verse.surah_number}:{currentVerse.verse.ayah})
                   </a>
+                  
+                  {/* Font size controls */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setFontSize(Math.max(0, fontSize - 1))}
+                      disabled={fontSize === 0}
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-white/20"
+                      aria-label="Decrease font size"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setFontSize(Math.min(2, fontSize + 1))}
+                      disabled={fontSize === 2}
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-white/20"
+                      aria-label="Increase font size"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
                 </motion.div>
 
-                {/* Arabic text - LARGE */}
+                {/* Arabic text */}
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -420,7 +475,7 @@ export default function HomePage() {
                   className="mb-8 md:mb-10"
                 >
                   <p
-                    className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-relaxed md:leading-loose text-white font-arabic"
+                    className={`${fontSizeClasses.arabic[fontSize]} leading-relaxed md:leading-loose text-white font-arabic`}
                     dir="rtl"
                   >
                     {currentVerse.verse.text_ar}
@@ -434,7 +489,7 @@ export default function HomePage() {
                   transition={{ delay: 0.25 }}
                   className="mb-6"
                 >
-                  <p className="text-lg md:text-2xl lg:text-3xl text-white/80 italic leading-relaxed">
+                  <p className={`${fontSizeClasses.english[fontSize]} text-white/80 italic leading-relaxed`}>
                     "{currentVerse.verse.text_en}"
                   </p>
                 </motion.div>
@@ -452,7 +507,7 @@ export default function HomePage() {
                       <span className="text-xs text-white/40 uppercase tracking-wider">Phonetic</span>
                       <div className="h-px w-12 bg-white/20"></div>
                     </div>
-                    <p className="text-base md:text-xl lg:text-2xl text-white/60 leading-relaxed">
+                    <p className={`${fontSizeClasses.transliteration[fontSize]} text-white/60 leading-relaxed`}>
                       {currentVerse.verse.text_transliteration}
                     </p>
                   </motion.div>
