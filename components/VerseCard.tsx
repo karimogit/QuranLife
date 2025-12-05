@@ -257,9 +257,7 @@ export default function VerseCard({ verse }: VerseCardProps) {
 
       <div className="text-center mb-6 relative z-10">
         <p 
-          className={`text-xl leading-relaxed text-gray-800 mb-4 font-arabic transition-all duration-300 ${
-            isPlaying ? 'arabic-playing' : ''
-          }`} 
+          className="text-xl leading-relaxed text-gray-800 mb-4 font-arabic"
           dir="rtl"
         >
           {verse.text_ar}

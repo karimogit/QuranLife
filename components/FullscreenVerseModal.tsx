@@ -174,7 +174,7 @@ export default function FullscreenVerseModal({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className={`max-w-5xl text-center mb-8 md:mb-12 ${isPlaying ? 'arabic-playing' : ''}`}
+              className="max-w-5xl text-center mb-8 md:mb-12"
             >
               <p
                 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-relaxed md:leading-loose text-white font-arabic fullscreen-verse-text"
@@ -242,58 +242,61 @@ export default function FullscreenVerseModal({
               </motion.div>
             )}
 
-            {/* Audio controls */}
-            {audioUrl && (
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                <button
-                  onClick={handleAudioToggle}
-                  disabled={isLoading}
-                  className={`flex items-center gap-3 px-8 py-4 rounded-full text-lg font-medium transition-all ${
-                    isPlaying
-                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                      : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            {/* Audio controls and keyboard hint container */}
+            <div className="mt-auto pt-4 flex flex-col items-center gap-4 pb-16 md:pb-20">
+              {/* Audio controls */}
+              {audioUrl && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
                 >
-                  {isLoading ? (
-                    <>
-                      <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Loading...</span>
-                    </>
-                  ) : isPlaying ? (
-                    <>
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
-                      </svg>
-                      <span>Pause Recitation</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                      <span>Listen to Recitation</span>
-                    </>
-                  )}
-                </button>
-              </motion.div>
-            )}
+                  <button
+                    onClick={handleAudioToggle}
+                    disabled={isLoading}
+                    className={`flex items-center gap-3 px-8 py-4 rounded-full text-lg font-medium transition-all ${
+                      isPlaying
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                        : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Loading...</span>
+                      </>
+                    ) : isPlaying ? (
+                      <>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                        </svg>
+                        <span>Pause Recitation</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <span>Listen to Recitation</span>
+                      </>
+                    )}
+                  </button>
+                </motion.div>
+              )}
 
-            {/* Keyboard hint */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="absolute bottom-4 md:bottom-8 text-white/40 text-xs md:text-sm"
-            >
-              Press <kbd className="px-2 py-1 bg-white/10 rounded text-white/60">ESC</kbd> or click outside to close
-            </motion.p>
+              {/* Keyboard hint */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-white/40 text-xs md:text-sm"
+              >
+                Press <kbd className="px-2 py-1 bg-white/10 rounded text-white/60">ESC</kbd> or click outside to close
+              </motion.p>
+            </div>
           </motion.div>
         </motion.div>
       )}
