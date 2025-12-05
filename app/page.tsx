@@ -29,11 +29,31 @@ export default function HomePage() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isAudioLoading, setIsAudioLoading] = useState(false)
   const [showInput, setShowInput] = useState(false)
+  const [fontSize, setFontSize] = useState(1) // 0 = small, 1 = medium, 2 = large
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const currentGoal = goals[currentGoalIndex]
   const currentGuidance = currentGoal ? guidanceMap[currentGoal.id] : null
   const currentVerse = currentGuidance?.guidance?.[currentVerseIndex]
+
+  // Font size classes for different elements
+  const fontSizeClasses = {
+    arabic: [
+      'text-2xl md:text-3xl lg:text-4xl',      // small
+      'text-3xl md:text-4xl lg:text-5xl',      // medium (default)
+      'text-4xl md:text-5xl lg:text-6xl',      // large
+    ],
+    english: [
+      'text-base md:text-lg lg:text-xl',       // small
+      'text-lg md:text-xl lg:text-2xl',        // medium (default)
+      'text-xl md:text-2xl lg:text-3xl',       // large
+    ],
+    transliteration: [
+      'text-sm md:text-base lg:text-lg',       // small
+      'text-base md:text-lg lg:text-xl',       // medium (default)
+      'text-lg md:text-xl lg:text-2xl',        // large
+    ],
+  }
 
   const loadGuidance = useCallback(async (goalId: string, goalTitle: string) => {
     setGuidanceMap(prev => ({
@@ -74,12 +94,23 @@ export default function HomePage() {
     setGoals(savedGoals)
   }, [])
 
+  // Load font size from storage on mount
+  useEffect(() => {
+    const savedFontSize = storage.get<number>('quranlife-fontsize', 1)
+    setFontSize(savedFontSize)
+  }, [])
+
   // Save goals to storage when changed
   useEffect(() => {
     if (goals.length > 0) {
       storage.set('quranlife-goals', goals)
     }
   }, [goals])
+
+  // Save font size to storage when changed
+  useEffect(() => {
+    storage.set('quranlife-fontsize', fontSize)
+  }, [fontSize])
 
   // Load guidance for current goal
   useEffect(() => {
@@ -236,12 +267,12 @@ export default function HomePage() {
   // Empty state - no goals
   if (goals.length === 0) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
+      <div className="min-h-[calc(100vh-4rem)] flex items-start md:items-center justify-center px-4 pt-12 md:pt-0">
         <div className="max-w-md w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
+            className="text-center mb-6"
           >
             <h1 className="text-xl md:text-2xl font-semibold text-white whitespace-nowrap">
               What do you want to grow towards?
@@ -371,7 +402,7 @@ export default function HomePage() {
               initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="mb-8"
+              className="mb-4"
             >
               <h2 className={`text-xl md:text-2xl lg:text-3xl font-semibold leading-relaxed ${
                 currentGoal?.completed ? 'text-white/40 line-through' : 'text-white'
@@ -379,6 +410,21 @@ export default function HomePage() {
                 {currentGoal?.title}
               </h2>
             </motion.div>
+
+            {/* Reflection - How this applies */}
+            {currentVerse?.verse.reflection && (
+              <motion.div
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.15 }}
+                className="mb-8 max-w-2xl mx-auto"
+              >
+                <p className="text-sm md:text-base text-emerald-300/70 leading-relaxed">
+                  <span className="font-medium text-emerald-300">How this applies: </span>
+                  {currentVerse.verse.reflection}
+                </p>
+              </motion.div>
+            )}
 
             {/* Loading state */}
             {currentGuidance?.loading && (
@@ -395,13 +441,38 @@ export default function HomePage() {
             {/* Verse display */}
             {!currentGuidance?.loading && currentVerse && (
               <>
-                {/* Surah reference */}
+                {/* Surah reference with font size controls and play button */}
                 <motion.div
                   initial={{ y: -10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.15 }}
-                  className="mb-6 md:mb-8"
+                  className="mb-6 md:mb-8 flex items-center justify-center gap-3"
                 >
+                  {/* Font size controls */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setFontSize(Math.max(0, fontSize - 1))}
+                      disabled={fontSize === 0}
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-white/20"
+                      aria-label="Decrease font size"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setFontSize(Math.min(2, fontSize + 1))}
+                      disabled={fontSize === 2}
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-white/20"
+                      aria-label="Increase font size"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Surah name link */}
                   <a
                     href={`https://quran.com/${currentVerse.verse.surah_number}/${currentVerse.verse.ayah}`}
                     target="_blank"
@@ -410,9 +481,38 @@ export default function HomePage() {
                   >
                     {currentVerse.verse.surah} ({currentVerse.verse.surah_number}:{currentVerse.verse.ayah})
                   </a>
+                  
+                  {/* Play button */}
+                  {currentVerse.verse.audio && (
+                    <button
+                      onClick={handleAudioToggle}
+                      disabled={isAudioLoading}
+                      className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${
+                        isPlaying
+                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                          : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white border border-white/20'
+                      } ${isAudioLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      aria-label={isPlaying ? 'Pause recitation' : 'Play recitation'}
+                    >
+                      {isAudioLoading ? (
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                      ) : isPlaying ? (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      )}
+                    </button>
+                  )}
                 </motion.div>
 
-                {/* Arabic text - LARGE */}
+                {/* Arabic text */}
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -420,7 +520,7 @@ export default function HomePage() {
                   className="mb-8 md:mb-10"
                 >
                   <p
-                    className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-relaxed md:leading-loose text-white font-arabic"
+                    className={`${fontSizeClasses.arabic[fontSize]} leading-relaxed md:leading-loose text-white font-arabic`}
                     dir="rtl"
                   >
                     {currentVerse.verse.text_ar}
@@ -434,7 +534,7 @@ export default function HomePage() {
                   transition={{ delay: 0.25 }}
                   className="mb-6"
                 >
-                  <p className="text-lg md:text-2xl lg:text-3xl text-white/80 italic leading-relaxed">
+                  <p className={`${fontSizeClasses.english[fontSize]} text-white/80 italic leading-relaxed`}>
                     "{currentVerse.verse.text_en}"
                   </p>
                 </motion.div>
@@ -452,98 +552,43 @@ export default function HomePage() {
                       <span className="text-xs text-white/40 uppercase tracking-wider">Phonetic</span>
                       <div className="h-px w-12 bg-white/20"></div>
                     </div>
-                    <p className="text-base md:text-xl lg:text-2xl text-white/60 leading-relaxed">
+                    <p className={`${fontSizeClasses.transliteration[fontSize]} text-white/60 leading-relaxed`}>
                       {currentVerse.verse.text_transliteration}
                     </p>
                   </motion.div>
                 )}
 
-                {/* Reflection */}
-                {currentVerse.verse.reflection && (
+                {/* Verse navigation */}
+                {currentGuidance?.guidance && currentGuidance.guidance.length > 1 && (
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.35 }}
-                    className="mb-8 max-w-2xl mx-auto"
+                    transition={{ delay: 0.4 }}
+                    className="flex items-center justify-center gap-3"
                   >
-                    <p className="text-sm md:text-base text-emerald-300/70 leading-relaxed">
-                      <span className="font-medium text-emerald-300">How this applies: </span>
-                      {currentVerse.verse.reflection}
-                    </p>
+                    <button
+                      onClick={() => navigateVerse('prev')}
+                      className="p-3 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors touch-manipulation"
+                      aria-label="Previous verse"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <span className="text-sm text-white/50">
+                      Verse {currentVerseIndex + 1} of {currentGuidance.guidance.length}
+                    </span>
+                    <button
+                      onClick={() => navigateVerse('next')}
+                      className="p-3 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors touch-manipulation"
+                      aria-label="Next verse"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   </motion.div>
                 )}
-
-                {/* Audio and verse navigation */}
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  className="flex flex-col items-center gap-4"
-                >
-                  {/* Audio button */}
-                  {currentVerse.verse.audio && (
-                    <button
-                      onClick={handleAudioToggle}
-                      disabled={isAudioLoading}
-                      className={`flex items-center gap-3 px-8 py-4 rounded-full text-lg font-medium transition-all ${
-                        isPlaying
-                          ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                          : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                      } ${isAudioLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      {isAudioLoading ? (
-                        <>
-                          <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                          </svg>
-                          <span>Loading...</span>
-                        </>
-                      ) : isPlaying ? (
-                        <>
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
-                          </svg>
-                          <span>Pause Recitation</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                          <span>Listen to Recitation</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-
-                  {/* Verse navigation */}
-                  {currentGuidance?.guidance && currentGuidance.guidance.length > 1 && (
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => navigateVerse('prev')}
-                        className="p-3 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors touch-manipulation"
-                        aria-label="Previous verse"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <span className="text-sm text-white/50">
-                        Verse {currentVerseIndex + 1} of {currentGuidance.guidance.length}
-                      </span>
-                      <button
-                        onClick={() => navigateVerse('next')}
-                        className="p-3 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white transition-colors touch-manipulation"
-                        aria-label="Next verse"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-                </motion.div>
               </>
             )}
 
