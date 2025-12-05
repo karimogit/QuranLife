@@ -17,18 +17,18 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="py-8 pb-20">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">Terms of Service</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-white mb-4">Terms of Service</h1>
+          <p className="text-white/60">
             Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           <DashboardCard title="1. Acceptance of Terms">
-            <div className="prose prose-sm max-w-none text-gray-700">
+            <div className="text-white/70">
               <p>
                 By accessing and using QuranLife ("the App"), you accept and agree to be bound by the terms and 
                 provision of this agreement. This App is designed to support your Islamic spiritual journey and 
@@ -38,8 +38,8 @@ export default function TermsPage() {
           </DashboardCard>
 
           <DashboardCard title="2. Description of Service">
-            <div className="prose prose-sm max-w-none text-gray-700">
-              <p className="mb-4">
+            <div className="space-y-4 text-white/70">
+              <p>
                 QuranLife is a Progressive Web App (PWA) that provides:
               </p>
               <ul className="list-disc pl-6 space-y-2">
@@ -53,8 +53,8 @@ export default function TermsPage() {
           </DashboardCard>
 
           <DashboardCard title="3. Islamic Principles and Guidance">
-            <div className="prose prose-sm max-w-none text-gray-700">
-              <p className="mb-4">
+            <div className="space-y-4 text-white/70">
+              <p>
                 This App incorporates Islamic teachings and Quranic verses. We strive for accuracy but remind users that:
               </p>
               <ul className="list-disc pl-6 space-y-2">
@@ -67,8 +67,8 @@ export default function TermsPage() {
           </DashboardCard>
 
           <DashboardCard title="4. User Responsibilities">
-            <div className="prose prose-sm max-w-none text-gray-700">
-              <p className="mb-4">You agree to:</p>
+            <div className="space-y-4 text-white/70">
+              <p>You agree to:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Use the App in accordance with Islamic principles</li>
                 <li>Not use the App for any unlawful or prohibited purpose</li>
@@ -80,8 +80,8 @@ export default function TermsPage() {
           </DashboardCard>
 
           <DashboardCard title="5. Privacy and Data Storage">
-            <div className="prose prose-sm max-w-none text-gray-700">
-              <p className="mb-4">
+            <div className="space-y-4 text-white/70">
+              <p>
                 QuranLife prioritizes your privacy:
               </p>
               <ul className="list-disc pl-6 space-y-2">
@@ -94,8 +94,8 @@ export default function TermsPage() {
           </DashboardCard>
 
           <DashboardCard title="6. Intellectual Property">
-            <div className="prose prose-sm max-w-none text-gray-700">
-              <p className="mb-4">
+            <div className="text-white/70">
+              <p>
                 The App and its original content, features, and functionality are owned by QuranLife and are 
                 protected by international copyright, trademark, and other intellectual property laws. 
                 Quranic verses are from Allah (SWT) and belong to all humanity.
@@ -104,8 +104,8 @@ export default function TermsPage() {
           </DashboardCard>
 
           <DashboardCard title="7. Disclaimer of Warranties">
-            <div className="prose prose-sm max-w-none text-gray-700">
-              <p className="mb-4">
+            <div className="space-y-4 text-white/70">
+              <p>
                 The App is provided "as is" without any warranties. While we strive for accuracy in Islamic 
                 content, we make no representations or warranties regarding:
               </p>
@@ -118,7 +118,7 @@ export default function TermsPage() {
           </DashboardCard>
 
           <DashboardCard title="8. Limitation of Liability">
-            <div className="prose prose-sm max-w-none text-gray-700">
+            <div className="text-white/70">
               <p>
                 In no event shall QuranLife or its creators be liable for any indirect, incidental, special, 
                 consequential, or punitive damages, including loss of data or use, arising out of your use 
@@ -128,7 +128,7 @@ export default function TermsPage() {
           </DashboardCard>
 
           <DashboardCard title="9. Modifications to Terms">
-            <div className="prose prose-sm max-w-none text-gray-700">
+            <div className="text-white/70">
               <p>
                 We reserve the right to modify these terms at any time. We will notify users of any 
                 material changes through the App. Your continued use of the App after such modifications 
@@ -136,10 +136,8 @@ export default function TermsPage() {
               </p>
             </div>
           </DashboardCard>
-
-
         </div>
       </div>
     </div>
   )
-} 
+}

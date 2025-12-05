@@ -16,15 +16,15 @@ function DashboardCard({ title, children, className = '', icon }: DashboardCardP
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow ${className}`}
+      className={`bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-6 ${className}`}
     >
       <div className="flex items-center gap-3 mb-4">
         {icon && (
-          <div className="p-2 bg-green-50 rounded-lg text-green-600">
+          <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
             {icon}
           </div>
         )}
-        <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
       </div>
       {children}
     </motion.div>

@@ -89,42 +89,6 @@
   }
 }
 
-/* Arabic text highlighting animation during audio playback */
-@keyframes arabic-glow {
-  0%, 100% {
-    text-shadow: 0 0 4px rgba(16, 185, 129, 0.3), 0 0 8px rgba(16, 185, 129, 0.2);
-  }
-  50% {
-    text-shadow: 0 0 12px rgba(16, 185, 129, 0.5), 0 0 24px rgba(16, 185, 129, 0.3), 0 0 36px rgba(16, 185, 129, 0.2);
-  }
-}
-
-@keyframes arabic-highlight-wave {
-  0% {
-    background-position: 200% center;
-  }
-  100% {
-    background-position: -200% center;
-  }
-}
-
-.arabic-playing {
-  animation: arabic-glow 2s ease-in-out infinite;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(16, 185, 129, 0.15) 25%,
-    rgba(16, 185, 129, 0.25) 50%,
-    rgba(16, 185, 129, 0.15) 75%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: arabic-glow 2s ease-in-out infinite, arabic-highlight-wave 3s linear infinite;
-  border-radius: 8px;
-  padding: 8px 12px;
-  transition: all 0.3s ease;
-}
-
 /* Fullscreen verse modal styles */
 .fullscreen-verse-backdrop {
   backdrop-filter: blur(8px);

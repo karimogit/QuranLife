@@ -141,7 +141,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} bg-gray-50 min-h-screen`}>
+      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900`}>
         {/* Service Worker Registration */}
         <script
           dangerouslySetInnerHTML={{
@@ -161,116 +161,116 @@ export default function RootLayout({
           }}
         />
         
+        {/* Decorative background elements */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        </div>
+        
         <ErrorBoundary>
-        <div className="min-h-screen flex flex-col">
+        <div className="relative min-h-screen flex flex-col">
           {/* Header - Desktop Only */}
-          <header className="hidden md:block bg-gradient-to-r from-green-50 to-blue-50 shadow-sm border-b border-green-100">
+          <header className="hidden md:block bg-white/5 backdrop-blur-sm border-b border-white/10">
             <div className="max-w-4xl mx-auto px-4 py-4">
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-lg">QL</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                      QuranLife
-                    </span>
-                  </div>
+                  <span className="text-xl font-bold text-white">
+                    QuranLife
+                  </span>
                 </Link>
                 
-                  <nav className="flex space-x-8">
-                    <Link href="/" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
-                      Goals
-                    </Link>
-                    <Link href="/settings" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
-                      Settings
-                    </Link>
-                  </nav>
+                <nav className="flex space-x-8">
+                  <Link href="/" className="text-white/70 hover:text-emerald-400 transition-colors font-medium">
+                    Goals
+                  </Link>
+                  <Link href="/settings" className="text-white/70 hover:text-emerald-400 transition-colors font-medium">
+                    Settings
+                  </Link>
+                </nav>
               </div>
             </div>
           </header>
 
           {/* Mobile Top Navigation */}
-          <nav className="md:hidden bg-white border-b border-gray-200 px-4 py-3">
+          <nav className="md:hidden bg-white/5 backdrop-blur-sm border-b border-white/10 px-4 py-3">
             <div className="max-w-4xl mx-auto">
               {/* Mobile Logo */}
               <div className="flex items-center justify-center mb-3">
                 <Link href="/" className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
+                  <div className="w-6 h-6 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-sm">QL</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                      QuranLife
-                    </span>
-                  </div>
+                  <span className="text-lg font-bold text-white">
+                    QuranLife
+                  </span>
                 </Link>
               </div>
               
               {/* Mobile Navigation */}
-                <div className="flex justify-around">
-                  <Link href="/" className="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-green-600 transition-colors" aria-label="Go to Goals">
-                    <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span className="text-xs">Goals</span>
-                  </Link>
-                  <Link href="/settings" className="flex flex-col items-center py-2 px-3 text-gray-600 hover:text-green-600 transition-colors" aria-label="Go to Settings">
-                    <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span className="text-xs">Settings</span>
-                  </Link>
-                </div>
+              <div className="flex justify-around">
+                <Link href="/" className="flex flex-col items-center py-2 px-3 text-white/60 hover:text-emerald-400 transition-colors" aria-label="Go to Goals">
+                  <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <span className="text-xs">Goals</span>
+                </Link>
+                <Link href="/settings" className="flex flex-col items-center py-2 px-3 text-white/60 hover:text-emerald-400 transition-colors" aria-label="Go to Settings">
+                  <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-xs">Settings</span>
+                </Link>
+              </div>
             </div>
           </nav>
 
           {/* Main Content */}
-          <main className="flex-1">
+          <main className="flex-1 relative">
             {children}
           </main>
 
           {/* Footer */}
-          <footer className="hidden md:block bg-gradient-to-r from-green-50 to-blue-50 border-t border-green-100 mt-auto">
+          <footer className="hidden md:block bg-white/5 backdrop-blur-sm border-t border-white/10 mt-auto">
             <div className="max-w-4xl mx-auto px-4 py-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Brand Section */}
                 <div className="flex flex-col items-start">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-lg flex items-center justify-center">
                       <span className="text-white font-bold text-lg">QL</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-bold text-gray-800">QuranLife</h3>
-                    </div>
+                    <h3 className="text-lg font-bold text-white">QuranLife</h3>
                   </div>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-white/60 leading-relaxed">
                     A life planner that combines personal and spiritual goals with Quranic guidance.
                   </p>
                 </div>
 
                 {/* Quick Links */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-4">Quick Links</h4>
-                    <div className="space-y-2">
-                      <Link href="/" className="block text-sm text-gray-600 hover:text-green-600 transition-colors">
-                        Goals
-                      </Link>
-                      <Link href="/settings" className="block text-sm text-gray-600 hover:text-green-600 transition-colors">
-                        Settings
-                      </Link>
-                    </div>
+                  <h4 className="text-md font-semibold text-white mb-4">Quick Links</h4>
+                  <div className="space-y-2">
+                    <Link href="/" className="block text-sm text-white/60 hover:text-emerald-400 transition-colors">
+                      Goals
+                    </Link>
+                    <Link href="/settings" className="block text-sm text-white/60 hover:text-emerald-400 transition-colors">
+                      Settings
+                    </Link>
+                  </div>
                 </div>
 
                 {/* Legal */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-4">Legal</h4>
+                  <h4 className="text-md font-semibold text-white mb-4">Legal</h4>
                   <div className="space-y-2">
-                    <Link href="/privacy" className="block text-sm text-gray-600 hover:text-green-600 transition-colors">
+                    <Link href="/privacy" className="block text-sm text-white/60 hover:text-emerald-400 transition-colors">
                       Privacy Policy
                     </Link>
-                    <Link href="/terms" className="block text-sm text-gray-600 hover:text-green-600 transition-colors">
+                    <Link href="/terms" className="block text-sm text-white/60 hover:text-emerald-400 transition-colors">
                       Terms of Service
                     </Link>
                   </div>
@@ -278,8 +278,8 @@ export default function RootLayout({
               </div>
 
               {/* Bottom Section */}
-              <div className="border-t border-green-200 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-                <div className="text-sm text-gray-600">
+              <div className="border-t border-white/10 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
+                <div className="text-sm text-white/50">
                   <p>© {new Date().getFullYear()} QuranLife.</p>
                 </div>
                 <div className="flex items-center gap-4 mt-4 md:mt-0">
@@ -287,7 +287,7 @@ export default function RootLayout({
                     href="https://github.com/KarimOsmanGH/QuranLife" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                    className="flex items-center gap-2 text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>

@@ -137,26 +137,26 @@ export default function FullscreenVerseModal({
             />
           )}
 
+          {/* Close button - fixed position */}
+          <button
+            onClick={onClose}
+            className="fixed top-4 right-4 md:top-8 md:right-8 z-50 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all group"
+            aria-label="Close fullscreen view"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           {/* Content container */}
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            className="relative h-full flex flex-col items-center justify-center p-6 md:p-12 fullscreen-verse-content overflow-auto"
+            className="relative h-full w-full flex flex-col items-center p-6 pt-16 md:p-12 md:pt-20 fullscreen-verse-content overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 md:top-8 md:right-8 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all group"
-              aria-label="Close fullscreen view"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
             {/* Surah info */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
@@ -174,7 +174,7 @@ export default function FullscreenVerseModal({
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className={`max-w-5xl text-center mb-8 md:mb-12 ${isPlaying ? 'arabic-playing' : ''}`}
+              className="max-w-5xl text-center mb-8 md:mb-12"
             >
               <p
                 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl leading-relaxed md:leading-loose text-white font-arabic fullscreen-verse-text"
@@ -184,48 +184,36 @@ export default function FullscreenVerseModal({
               </p>
             </motion.div>
 
-            {/* Toggle for English/Phonetic */}
+            {/* English translation */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.35 }}
-              className="flex items-center justify-center gap-1 mb-4"
-            >
-              <button
-                onClick={() => setTextDisplayMode('english')}
-                className={`px-4 py-2 text-sm font-medium rounded-l-full transition-all ${
-                  textDisplayMode === 'english'
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                English
-              </button>
-              <button
-                onClick={() => setTextDisplayMode('phonetic')}
-                className={`px-4 py-2 text-sm font-medium rounded-r-full transition-all ${
-                  textDisplayMode === 'phonetic'
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }`}
-              >
-                Phonetic
-              </button>
-            </motion.div>
-
-            {/* Translation or transliteration */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="max-w-3xl text-center mb-8"
+              className="max-w-3xl text-center mb-6"
             >
               <p className="text-lg md:text-2xl lg:text-3xl text-white/80 italic leading-relaxed">
-                {textDisplayMode === 'phonetic' && transliterationText
-                  ? transliterationText
-                  : `"${englishText}"`}
+                "{englishText}"
               </p>
             </motion.div>
+
+            {/* Phonetic/Transliteration */}
+            {transliterationText && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="max-w-3xl text-center mb-8"
+              >
+                <div className="mb-4 flex items-center justify-center gap-4">
+                  <div className="h-px w-16 bg-white/20"></div>
+                  <span className="text-xs text-white/40 uppercase tracking-wider">Phonetic</span>
+                  <div className="h-px w-16 bg-white/20"></div>
+                </div>
+                <p className="text-base md:text-xl lg:text-2xl text-white/60 leading-relaxed">
+                  {transliterationText}
+                </p>
+              </motion.div>
+            )}
 
             {/* Reflection */}
             {reflection && (
@@ -242,58 +230,61 @@ export default function FullscreenVerseModal({
               </motion.div>
             )}
 
-            {/* Audio controls */}
-            {audioUrl && (
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                <button
-                  onClick={handleAudioToggle}
-                  disabled={isLoading}
-                  className={`flex items-center gap-3 px-8 py-4 rounded-full text-lg font-medium transition-all ${
-                    isPlaying
-                      ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                      : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
-                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            {/* Audio controls and keyboard hint container */}
+            <div className="pt-4 flex flex-col items-center gap-4 pb-6 md:pb-8">
+              {/* Audio controls */}
+              {audioUrl && (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
                 >
-                  {isLoading ? (
-                    <>
-                      <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Loading...</span>
-                    </>
-                  ) : isPlaying ? (
-                    <>
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
-                      </svg>
-                      <span>Pause Recitation</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                      <span>Listen to Recitation</span>
-                    </>
-                  )}
-                </button>
-              </motion.div>
-            )}
+                  <button
+                    onClick={handleAudioToggle}
+                    disabled={isLoading}
+                    className={`flex items-center gap-3 px-8 py-4 rounded-full text-lg font-medium transition-all ${
+                      isPlaying
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                        : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                    } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Loading...</span>
+                      </>
+                    ) : isPlaying ? (
+                      <>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                        </svg>
+                        <span>Pause Recitation</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        <span>Listen to Recitation</span>
+                      </>
+                    )}
+                  </button>
+                </motion.div>
+              )}
 
-            {/* Keyboard hint */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="absolute bottom-4 md:bottom-8 text-white/40 text-xs md:text-sm"
-            >
-              Press <kbd className="px-2 py-1 bg-white/10 rounded text-white/60">ESC</kbd> or click outside to close
-            </motion.p>
+              {/* Keyboard hint */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-white/40 text-xs md:text-sm"
+              >
+                Press <kbd className="px-2 py-1 bg-white/10 rounded text-white/60">ESC</kbd> or click outside to close
+              </motion.p>
+            </div>
           </motion.div>
         </motion.div>
       )}

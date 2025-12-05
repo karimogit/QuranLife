@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { storage, sanitizeInput } from '@/lib/security'
 import { quranEngine, GoalMatchResult } from '@/lib/quran-engine'
-import FullscreenVerseModal from '@/components/FullscreenVerseModal'
 
 interface Goal {
   id: string
@@ -20,8 +19,6 @@ interface GoalGuidance {
   showGuidance: boolean
 }
 
-type TextDisplayMode = 'english' | 'phonetic';
-
 export default function HomePage() {
   const [goalTitle, setGoalTitle] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -29,15 +26,6 @@ export default function HomePage() {
   const [goals, setGoals] = useState<Goal[]>([])
   const [guidanceMap, setGuidanceMap] = useState<Record<string, GoalGuidance>>({})
   const [audioStates, setAudioStates] = useState<Record<string, { isPlaying: boolean; isLoading: boolean }>>({})
-  const [textDisplayMode, setTextDisplayMode] = useState<TextDisplayMode>('english')
-  const [fullscreenVerse, setFullscreenVerse] = useState<{
-    arabicText: string;
-    englishText: string;
-    transliterationText?: string;
-    surahInfo: string;
-    audioUrl?: string;
-    reflection?: string;
-  } | null>(null)
   const [verseIndexMap, setVerseIndexMap] = useState<Record<string, number>>({})
   const audioRefs = useRef<Record<string, HTMLAudioElement | null>>({})
 
@@ -212,13 +200,13 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto">
         {/* Goal Input Section */}
         <div className="mb-8">
-          <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-4 text-center">
+          <h1 className="text-xl md:text-2xl font-semibold text-white mb-4 text-center">
             What do you want to grow towards?
           </h1>
 
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
+            className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-4"
           >
             <div className="flex flex-col sm:flex-row gap-3">
               <input
@@ -228,17 +216,17 @@ export default function HomePage() {
                 placeholder="e.g. Read Quran daily, Exercise regularly..."
                 value={goalTitle}
                 onChange={e => setGoalTitle(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm md:text-base text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                className="flex-1 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm md:text-base text-white placeholder-white/50 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30"
               />
               <button
                 type="submit"
                 disabled={isSaving}
-                className="rounded-lg bg-emerald-600 px-6 py-3 text-sm md:text-base font-medium text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                className="rounded-lg bg-emerald-500 px-6 py-3 text-sm md:text-base font-medium text-white hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
               >
                 {isSaving ? 'Saving…' : 'Add Goal'}
               </button>
             </div>
-            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
           </form>
         </div>
 
@@ -256,58 +244,61 @@ export default function HomePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                    className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden"
                   >
                     {/* Goal Card */}
                     <div className="p-4">
                       <div className="flex items-start gap-3">
-                        {/* Completion checkbox */}
+                        {/* Completion checkbox - larger touch target for mobile */}
                         <button
                           onClick={() => handleToggleComplete(goal.id)}
-                          className={`flex-shrink-0 w-5 h-5 mt-0.5 rounded border-2 flex items-center justify-center transition-all ${
+                          className={`flex-shrink-0 w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all touch-manipulation ${
                             goal.completed
                               ? 'bg-emerald-500 border-emerald-500 text-white'
-                              : 'border-gray-300 hover:border-emerald-400'
+                              : 'border-white/40 hover:border-emerald-400 active:border-emerald-400'
                           }`}
+                          style={{ minWidth: '28px', minHeight: '28px' }}
                         >
                           {goal.completed && (
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           )}
                         </button>
 
                         {/* Goal title */}
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm md:text-base font-medium break-words ${
-                            goal.completed ? 'text-gray-400 line-through' : 'text-gray-900'
+                        <div className="flex-1 min-w-0 py-0.5">
+                          <p className={`text-base font-medium break-words leading-snug ${
+                            goal.completed ? 'text-white/40 line-through' : 'text-white'
                           }`}>
                             {goal.title}
                           </p>
                         </div>
 
-                        {/* Delete button */}
+                        {/* Delete button - larger touch target */}
                         <button
                           onClick={() => handleRemoveGoal(goal.id)}
-                          className="flex-shrink-0 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          className="flex-shrink-0 p-2 -m-1 text-white/40 hover:text-red-400 active:text-red-400 transition-colors touch-manipulation"
                           title="Remove goal"
+                          style={{ minWidth: '36px', minHeight: '36px' }}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       </div>
 
-                      {/* Show Surah Button */}
+                      {/* Show Surah Button - proper touch target */}
                       <button
                         onClick={() => toggleGuidance(goal.id, goal.title)}
-                        className={`mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all touch-manipulation ${
                           isShowingGuidance
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-gray-50 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600'
+                            ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/50'
+                            : 'bg-white/10 text-white/70 hover:bg-emerald-500/20 active:bg-emerald-500/20 hover:text-emerald-300 border border-white/10'
                         }`}
+                        style={{ minHeight: '44px' }}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                         {isShowingGuidance ? 'Hide Surah' : 'Related Surah'}
@@ -321,13 +312,13 @@ export default function HomePage() {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          className="border-t border-gray-100 bg-gradient-to-b from-emerald-50/50 to-white overflow-hidden"
+                          className="border-t border-white/10 bg-white/5 overflow-hidden"
                         >
                           <div className="p-4">
                             {guidance?.loading ? (
                               <div className="flex items-center justify-center py-4">
-                                <div className="animate-spin w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
-                                <span className="ml-2 text-sm text-gray-500">Finding guidance...</span>
+                                <div className="animate-spin w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full"></div>
+                                <span className="ml-2 text-sm text-white/60">Finding guidance...</span>
                               </div>
                             ) : guidance?.guidance?.length > 0 ? (
                               (() => {
@@ -338,19 +329,20 @@ export default function HomePage() {
                                 const audioState = audioStates[audioKey]
                                 
                                 return (
-                                  <div className="space-y-3">
+                                  <div className="space-y-4">
                                     {/* Surah reference with navigation arrows */}
-                                    <div className="flex items-center justify-between flex-wrap gap-2">
-                                      <div className="flex items-center gap-2">
-                                        {/* Left arrow */}
+                                    <div className="flex items-center justify-between flex-wrap gap-3">
+                                      <div className="flex items-center gap-1">
+                                        {/* Left arrow - larger touch target */}
                                         {totalVerses > 1 && (
                                           <button
                                             onClick={() => setVerseIndexMap(prev => ({
                                               ...prev,
                                               [goal.id]: currentIndex === 0 ? totalVerses - 1 : currentIndex - 1
                                             }))}
-                                            className="p-1 rounded-full bg-gray-100 text-gray-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors"
+                                            className="p-2 rounded-full bg-white/10 text-white/60 hover:bg-emerald-500/30 active:bg-emerald-500/30 hover:text-emerald-300 transition-colors touch-manipulation"
                                             aria-label="Previous verse"
+                                            style={{ minWidth: '36px', minHeight: '36px' }}
                                           >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -362,20 +354,21 @@ export default function HomePage() {
                                           href={`https://quran.com/${match.verse.surah_number}/${match.verse.ayah}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full hover:bg-emerald-200 transition-colors"
+                                          className="text-xs font-medium text-emerald-300 bg-emerald-500/20 px-3 py-1.5 rounded-full hover:bg-emerald-500/30 active:bg-emerald-500/30 transition-colors border border-emerald-500/30 touch-manipulation"
                                         >
                                           {match.verse.surah} ({match.verse.surah_number}:{match.verse.ayah})
                                         </a>
                                         
-                                        {/* Right arrow */}
+                                        {/* Right arrow - larger touch target */}
                                         {totalVerses > 1 && (
                                           <button
                                             onClick={() => setVerseIndexMap(prev => ({
                                               ...prev,
                                               [goal.id]: currentIndex === totalVerses - 1 ? 0 : currentIndex + 1
                                             }))}
-                                            className="p-1 rounded-full bg-gray-100 text-gray-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors"
+                                            className="p-2 rounded-full bg-white/10 text-white/60 hover:bg-emerald-500/30 active:bg-emerald-500/30 hover:text-emerald-300 transition-colors touch-manipulation"
                                             aria-label="Next verse"
+                                            style={{ minWidth: '36px', minHeight: '36px' }}
                                           >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -385,53 +378,36 @@ export default function HomePage() {
                                         
                                         {/* Verse counter */}
                                         {totalVerses > 1 && (
-                                          <span className="text-xs text-gray-400 ml-1">
+                                          <span className="text-xs text-white/40 ml-1">
                                             {currentIndex + 1}/{totalVerses}
                                           </span>
                                         )}
                                       </div>
                                       
-                                      <div className="flex items-center gap-2">
-                                        {/* Fullscreen button */}
-                                        <button
-                                          onClick={() => setFullscreenVerse({
-                                            arabicText: match.verse.text_ar,
-                                            englishText: match.verse.text_en,
-                                            transliterationText: match.verse.text_transliteration,
-                                            surahInfo: `${match.verse.surah} (${match.verse.surah_number}:${match.verse.ayah})`,
-                                            audioUrl: match.verse.audio,
-                                            reflection: match.verse.reflection
-                                          })}
-                                          className="p-1.5 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-                                          aria-label="View verse fullscreen"
-                                        >
-                                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                          </svg>
-                                        </button>
-
-                                        {/* Audio button */}
+                                      <div className="flex items-center">
+                                        {/* Audio button - proper touch target */}
                                         {match.verse.audio && (
                                           <button
                                             onClick={() => handleAudioToggle(audioKey, match.verse.audio!)}
                                             disabled={audioState?.isLoading}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all touch-manipulation ${
                                               audioState?.isPlaying
                                                 ? 'bg-emerald-500 text-white'
-                                                : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                                : 'bg-white/10 text-white/70 hover:bg-emerald-500/30 active:bg-emerald-500/30 hover:text-emerald-300 border border-white/20'
                                             } ${audioState?.isLoading ? 'opacity-50' : ''}`}
+                                            style={{ minHeight: '40px' }}
                                           >
                                             {audioState?.isLoading ? (
-                                              <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                               </svg>
                                             ) : audioState?.isPlaying ? (
-                                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
                                               </svg>
                                             ) : (
-                                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M8 5v14l11-7z"/>
                                               </svg>
                                             )}
@@ -441,51 +417,37 @@ export default function HomePage() {
                                       </div>
                                     </div>
 
-                                    {/* Arabic text with highlighting effect */}
+                                    {/* Arabic text */}
                                     <p 
-                                      className={`text-base leading-loose text-gray-800 font-arabic text-right transition-all duration-300 ${
-                                        audioState?.isPlaying ? 'arabic-playing' : ''
-                                      }`} 
+                                      className="text-2xl md:text-3xl leading-relaxed md:leading-loose text-white font-arabic text-center py-2"
                                       dir="rtl"
                                     >
                                       {match.verse.text_ar}
                                     </p>
 
-                                    {/* Toggle for English/Phonetic */}
-                                    <div className="flex items-center justify-center gap-1 py-2">
-                                      <button
-                                        onClick={() => setTextDisplayMode('english')}
-                                        className={`px-3 py-1 text-xs font-medium rounded-l-full transition-all ${
-                                          textDisplayMode === 'english'
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                      >
-                                        English
-                                      </button>
-                                      <button
-                                        onClick={() => setTextDisplayMode('phonetic')}
-                                        className={`px-3 py-1 text-xs font-medium rounded-r-full transition-all ${
-                                          textDisplayMode === 'phonetic'
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        }`}
-                                      >
-                                        Phonetic
-                                      </button>
-                                    </div>
-
-                                    {/* English translation or Phonetic */}
-                                    <p className="text-sm text-gray-600 italic leading-relaxed">
-                                      {textDisplayMode === 'phonetic' && match.verse.text_transliteration
-                                        ? match.verse.text_transliteration
-                                        : `"${match.verse.text_en}"`}
+                                    {/* English translation */}
+                                    <p className="text-base md:text-lg text-white/80 italic leading-relaxed text-center">
+                                      "{match.verse.text_en}"
                                     </p>
+
+                                    {/* Phonetic/Transliteration */}
+                                    {match.verse.text_transliteration && (
+                                      <>
+                                        <div className="flex items-center justify-center gap-3 py-1">
+                                          <div className="h-px w-10 bg-white/20"></div>
+                                          <span className="text-[10px] text-white/40 uppercase tracking-wider">Phonetic</span>
+                                          <div className="h-px w-10 bg-white/20"></div>
+                                        </div>
+                                        <p className="text-sm md:text-base text-white/60 leading-relaxed text-center">
+                                          {match.verse.text_transliteration}
+                                        </p>
+                                      </>
+                                    )}
 
                                     {/* Reflection */}
                                     {match.verse.reflection && (
-                                      <p className="text-xs text-gray-500 pt-2 border-t border-gray-100">
-                                        <span className="font-medium text-emerald-600">How this applies: </span>
+                                      <p className="text-sm text-emerald-300/70 pt-4 mt-2 border-t border-white/10">
+                                        <span className="font-medium text-emerald-300">How this applies: </span>
                                         {match.verse.reflection}
                                       </p>
                                     )}
@@ -493,7 +455,7 @@ export default function HomePage() {
                                 )
                               })()
                             ) : (
-                              <p className="text-sm text-gray-500 text-center py-2">
+                              <p className="text-sm text-white/50 text-center py-2">
                                 No guidance found for this goal.
                               </p>
                             )}
@@ -511,30 +473,16 @@ export default function HomePage() {
         {/* Empty state */}
         {goals.length === 0 && (
           <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 bg-emerald-100 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 mx-auto mb-4 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/30">
+              <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">No goals yet</h3>
-            <p className="text-sm text-gray-500">Add your first goal above to get started with Quranic guidance.</p>
+            <h3 className="text-lg font-medium text-white mb-1">No goals yet</h3>
+            <p className="text-sm text-white/60">Add your first goal above to get started with Quranic guidance.</p>
           </div>
         )}
       </div>
-
-      {/* Fullscreen Verse Modal */}
-      {fullscreenVerse && (
-        <FullscreenVerseModal
-          isOpen={!!fullscreenVerse}
-          onClose={() => setFullscreenVerse(null)}
-          arabicText={fullscreenVerse.arabicText}
-          englishText={fullscreenVerse.englishText}
-          transliterationText={fullscreenVerse.transliterationText}
-          surahInfo={fullscreenVerse.surahInfo}
-          audioUrl={fullscreenVerse.audioUrl}
-          reflection={fullscreenVerse.reflection}
-        />
-      )}
     </div>
   )
 }
