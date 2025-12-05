@@ -105,55 +105,6 @@ export default function AboutPage() {
         </div>
       </DashboardCard>
 
-      {/* Data Management */}
-      <div className="mt-6">
-        <DashboardCard 
-          title="Data Management" 
-          icon={
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-            </svg>
-          }
-        >
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-medium text-white">Local Storage</h4>
-              <p className="text-sm text-white/60 mt-1">
-                Your data is stored locally in your browser. No data is sent to external servers.
-              </p>
-            </div>
-            
-            <div className="pt-4 border-t border-white/10 space-y-4">
-              <div>
-                <button
-                  onClick={exportData}
-                  className="px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-400 active:bg-blue-400 transition-colors text-sm font-medium touch-manipulation"
-                  style={{ minHeight: '44px' }}
-                >
-                  Export Data
-                </button>
-                <p className="text-xs text-white/40 mt-2">
-                  Download all your goals and progress as a JSON file for backup or transfer.
-                </p>
-              </div>
-              
-              <div>
-                <button
-                  onClick={clearAllData}
-                  className="px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-400 active:bg-red-400 transition-colors text-sm font-medium touch-manipulation"
-                  style={{ minHeight: '44px' }}
-                >
-                  Clear All Data
-                </button>
-                <p className="text-xs text-white/40 mt-2">
-                  This will remove all your goals and progress. This action cannot be undone.
-                </p>
-              </div>
-            </div>
-          </div>
-        </DashboardCard>
-      </div>
-
       {/* Data Sources & Attribution */}
       <div className="mt-6">
         <DashboardCard title="📚 Data Sources & Attribution">
@@ -223,6 +174,55 @@ export default function AboutPage() {
                   AlQuran.cloud
                 </a>
               </p>
+            </div>
+          </div>
+        </DashboardCard>
+      </div>
+
+      {/* Data Management */}
+      <div className="mt-6">
+        <DashboardCard 
+          title="Data Management" 
+          icon={
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+            </svg>
+          }
+        >
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-white">Local Storage</h4>
+              <p className="text-sm text-white/60 mt-1">
+                Your data is stored locally in your browser. No data is sent to external servers.
+              </p>
+            </div>
+            
+            <div className="pt-4 border-t border-white/10 space-y-4">
+              <div>
+                <button
+                  onClick={exportData}
+                  className="px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-400 active:bg-blue-400 transition-colors text-sm font-medium touch-manipulation"
+                  style={{ minHeight: '44px' }}
+                >
+                  Export Data
+                </button>
+                <p className="text-xs text-white/40 mt-2">
+                  Download all your goals and progress as a JSON file for backup or transfer.
+                </p>
+              </div>
+              
+              <div>
+                <button
+                  onClick={clearAllData}
+                  className="px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-400 active:bg-red-400 transition-colors text-sm font-medium touch-manipulation"
+                  style={{ minHeight: '44px' }}
+                >
+                  Clear All Data
+                </button>
+                <p className="text-xs text-white/40 mt-2">
+                  This will remove all your goals and progress. This action cannot be undone.
+                </p>
+              </div>
             </div>
           </div>
         </DashboardCard>
