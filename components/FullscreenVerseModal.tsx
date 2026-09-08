@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { logger } from '@/lib/logger'
 
 interface FullscreenVerseModalProps {
   isOpen: boolean;
@@ -94,7 +95,7 @@ export default function FullscreenVerseModal({
         setIsLoading(false);
       }
     } catch (error) {
-      console.error('Error playing audio:', error);
+      logger.error('Error playing audio:', error);
       setIsLoading(false);
       setIsPlaying(false);
     }

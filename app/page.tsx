@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { storage, sanitizeInput } from '@/lib/security'
 import { quranEngine, GoalMatchResult } from '@/lib/quran-engine'
+import { logger } from '@/lib/logger'
 
 interface Goal {
   id: string
@@ -31,6 +32,7 @@ export default function HomePage() {
   const [showInput, setShowInput] = useState(false)
   const [fontSize, setFontSize] = useState(1) // 0 = small, 1 = medium, 2 = large
   const [isInputFocused, setIsInputFocused] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const currentGoal = goals[currentGoalIndex]
@@ -77,7 +79,7 @@ export default function HomePage() {
         }
       }))
     } catch (err) {
-      console.error('Failed to load guidance:', err)
+      logger.error('Failed to load guidance', err, 'HomePage')
       setGuidanceMap(prev => ({
         ...prev,
         [goalId]: {
@@ -89,29 +91,28 @@ export default function HomePage() {
     }
   }, [])
 
-  // Load goals from storage on mount
+  // Load goals and preferences from storage on mount
   useEffect(() => {
     const savedGoals = storage.get<Goal[]>('quranlife-goals', [])
-    setGoals(savedGoals)
-  }, [])
-
-  // Load font size from storage on mount
-  useEffect(() => {
     const savedFontSize = storage.get<number>('quranlife-fontsize', 1)
+    setGoals(savedGoals)
     setFontSize(savedFontSize)
+    setIsLoaded(true)
   }, [])
 
-  // Save goals to storage when changed
+  // Persist goals only after initial load (including empty list after deletions)
   useEffect(() => {
-    if (goals.length > 0) {
+    if (isLoaded) {
       storage.set('quranlife-goals', goals)
     }
-  }, [goals])
+  }, [goals, isLoaded])
 
-  // Save font size to storage when changed
+  // Persist font size only after initial load
   useEffect(() => {
-    storage.set('quranlife-fontsize', fontSize)
-  }, [fontSize])
+    if (isLoaded) {
+      storage.set('quranlife-fontsize', fontSize)
+    }
+  }, [fontSize, isLoaded])
 
   // Load guidance for current goal
   useEffect(() => {
@@ -156,7 +157,7 @@ export default function HomePage() {
       setShowInput(false)
       setCurrentGoalIndex(0) // Navigate to the new goal
     } catch (err) {
-      console.error('Failed to save goal', err)
+      logger.error('Failed to save goal', err, 'HomePage')
       setError('Something went wrong. Please try again.')
     } finally {
       setIsSaving(false)

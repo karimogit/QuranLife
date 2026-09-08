@@ -74,8 +74,6 @@ export function generateViewport() {
   return {
     width: 'device-width',
     initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
     themeColor: '#22c55e',
   }
 }
@@ -148,13 +146,7 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                      console.log('QuranLife SW registered successfully:', registration.scope);
-                    })
-                    .catch(function(error) {
-                      console.log('QuranLife SW registration failed:', error);
-                    });
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
                 });
               }
             `,

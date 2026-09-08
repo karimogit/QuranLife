@@ -33,7 +33,8 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js requires unsafe-inline and unsafe-eval for hydration
+              // 'unsafe-inline' is required for Next.js inline scripts/styles; avoid 'unsafe-eval'
+              "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline' blob: data: https://fonts.googleapis.com",
               "font-src 'self' data: https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
@@ -48,14 +49,6 @@ const nextConfig = {
       },
     ]
   },
-  async rewrites() {
-    return [
-      {
-        source: '/manifest.json',
-        destination: '/api/manifest'
-      }
-    ]
-  }
 }
 
-module.exports = withBundleAnalyzer(nextConfig) 
+module.exports = withBundleAnalyzer(nextConfig)

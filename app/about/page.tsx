@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import DashboardCard from '@/components/DashboardCard';
 import { storage } from '@/lib/security';
+import { logger } from '@/lib/logger'
 
 export default function AboutPage() {
   const exportData = () => {
@@ -36,7 +37,7 @@ export default function AboutPage() {
       
       alert('Data exported successfully! Your file has been downloaded.');
     } catch (error) {
-      console.error('Export failed:', error);
+      logger.error('Export failed:', error);
       alert('Export failed. Please try again.');
     }
   };

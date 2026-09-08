@@ -6,6 +6,7 @@
  */
 
 import { quranAPI, type Verse, type RandomVerseResponse, type Surah } from './quran-api';
+import { logger } from './logger';
 
 export interface QuranVerse {
   id: number;
@@ -266,7 +267,7 @@ class QuranEngine {
       const randomVerseResponse = await quranAPI.getRandomVerse();
       return this.convertAPIVerseToQuranVerse(randomVerseResponse);
     } catch (error) {
-      console.error('Error fetching daily verse:', error);
+      logger.error('Error fetching daily verse:', error);
       
       // Fallback to a default verse if API fails
       return this.getFallbackVerse();
@@ -279,7 +280,7 @@ class QuranEngine {
    */
   async findVersesForGoal(goal: string): Promise<GoalMatchResult[]> {
     try {
-      console.log('Finding verses for goal using AI:', goal);
+      logger.info('Finding verses for goal using AI:', goal);
       
       // Call the AI API to get semantically relevant verse references with explanations
       const response = await fetch('/api/ai', {
@@ -290,13 +291,13 @@ class QuranEngine {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('AI API error:', response.status, errorData);
+        logger.error('AI API error', { status: response.status, errorData }, 'quran-engine');
         throw new Error(`AI API error: ${response.status}`);
       }
 
       const aiResult = await response.json();
       const verseRefs: Array<{ surah: number; ayah: number; explanation: string }> = aiResult.verses || [];
-      console.log('AI recommended verses:', verseRefs);
+      logger.info('AI recommended verses:', verseRefs);
 
       if (verseRefs.length === 0) {
         throw new Error('No verses returned from AI');
@@ -338,19 +339,19 @@ class QuranEngine {
             });
           }
         } catch (verseError) {
-          console.error(`Error fetching verse ${ref.surah}:${ref.ayah}:`, verseError);
+          logger.error(`Error fetching verse ${ref.surah}:${ref.ayah}:`, verseError);
         }
       }
 
       if (matches.length > 0) {
-        console.log('Successfully matched', matches.length, 'verses via AI');
+        logger.info('Successfully matched', matches.length, 'verses via AI');
         return matches;
       }
 
       throw new Error('Failed to fetch any recommended verses');
 
     } catch (error) {
-      console.error('Error finding verses for goal:', error);
+      logger.error('Error finding verses for goal:', error);
       throw error;
     }
   }
@@ -364,7 +365,7 @@ class QuranEngine {
       const keywords = this.extractKeywords(goal);
       const theme = this.determineTheme(keywords);
       
-      console.log('Loading additional verses for goal:', { goal, currentCount });
+      logger.info('Loading additional verses for goal:', { goal, currentCount });
       
       // Build multiple search attempts with better strategy
       const distinctByNumber = (arr: any[]) => {
@@ -378,32 +379,32 @@ class QuranEngine {
 
       // Create more targeted search queries
       const searchQueries = this.buildSearchQueries(goal, keywords, theme);
-      console.log('Additional search queries:', searchQueries);
+      logger.info('Additional search queries:', searchQueries);
 
       let aggregated: any[] = [];
       
       // Try each search query until we get good results
       for (const query of searchQueries) {
         try {
-          console.log('Trying additional search query:', query);
+          logger.info('Trying additional search query:', query);
           const res = await quranAPI.searchVerses(query, 'en');
-          console.log(`Additional query "${query}" returned ${res.length} results`);
+          logger.info(`Additional query "${query}" returned ${res.length} results`);
           
           aggregated = distinctByNumber([...aggregated, ...res]);
           
           // Get more results for additional verses
           if (aggregated.length >= 10) {
-            console.log('Enough results for additional verses, stopping search');
+            logger.info('Enough results for additional verses, stopping search');
             break;
           }
         } catch (error) {
-          console.log(`Additional search query "${query}" failed:`, error);
+          logger.info(`Additional search query "${query}" failed:`, error);
           continue;
         }
       }
       
       if (aggregated.length === 0) {
-        console.log('No additional results found, using thematic fallback');
+        logger.info('No additional results found, using thematic fallback');
         return await this.getThematicVersesForGoal(theme, goal);
       }
 
@@ -419,7 +420,7 @@ class QuranEngine {
         .sort((a, b) => b.relevanceScore - a.relevanceScore)
         .slice(currentCount, currentCount + 3); // Get next 3 most relevant results
       
-      console.log('Additional results by relevance:', sortedResults.map(r => ({ 
+      logger.info('Additional results by relevance:', sortedResults.map(r => ({ 
         verse: r.apiVerse.number, 
         score: r.relevanceScore,
         text: (r.apiVerse.translation || r.apiVerse.text)?.substring(0, 100) + '...'
@@ -455,14 +456,14 @@ class QuranEngine {
               });
             }
           } catch (error) {
-            console.error('Error fetching full verse data:', error);
+            logger.error('Error fetching full verse data:', error);
           }
         }
       }
 
       return matches;
     } catch (error) {
-      console.error('Error getting additional verses for goal:', error);
+      logger.error('Error getting additional verses for goal:', error);
       const fallbackTheme = this.determineTheme(this.extractKeywords(goal));
       return await this.getThematicVersesForGoal(fallbackTheme, goal);
     }
@@ -521,7 +522,7 @@ class QuranEngine {
 
       return collection;
     } catch (error) {
-      console.error('Error getting thematic collection:', error);
+      logger.error('Error getting thematic collection:', error);
       return null;
     }
   }
@@ -556,7 +557,7 @@ class QuranEngine {
         audio: audioUrl
       };
     } catch (error) {
-      console.error('Error converting API verse:', error);
+      logger.error('Error converting API verse:', error);
       return null;
     }
   }
@@ -973,7 +974,7 @@ class QuranEngine {
       .filter(([, score]) => score > 0)
       .sort(([,a], [,b]) => b - a)[0];
     
-    console.log('Theme detection:', { keywords, themeScores: Object.fromEntries(Object.entries(themeScores).filter(([,v]) => v > 0)), selectedTheme: topTheme ? topTheme[0] : 'guidance' });
+    logger.info('Theme detection:', { keywords, themeScores: Object.fromEntries(Object.entries(themeScores).filter(([,v]) => v > 0)), selectedTheme: topTheme ? topTheme[0] : 'guidance' });
     
     // If no theme matches, return 'guidance' as default
     return topTheme ? topTheme[0] : 'guidance';
@@ -994,7 +995,7 @@ class QuranEngine {
         relatedHabits: this.getRelatedHabits(theme)
       }));
     } catch (error) {
-      console.error('Error getting thematic verses:', error);
+      logger.error('Error getting thematic verses:', error);
       return [];
     }
   }
@@ -1702,14 +1703,14 @@ class QuranEngine {
           } as any);
           if (qv) results.push(qv);
         } catch (error) {
-          console.log(`Failed to fetch verse ${s}:${a} for theme ${theme}:`, error);
+          logger.info(`Failed to fetch verse ${s}:${a} for theme ${theme}:`, error);
           continue;
         }
       }
       
       return results;
     } catch (error) {
-      console.error('Error building curated theme verses:', error);
+      logger.error('Error building curated theme verses:', error);
       return [];
     }
   }
@@ -1744,7 +1745,7 @@ class QuranEngine {
       
       return verse;
     } catch (error) {
-      console.error('Error getting smart recommendation:', error);
+      logger.error('Error getting smart recommendation:', error);
       return this.getFallbackVerse();
     }
   }

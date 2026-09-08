@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -14,9 +15,17 @@ export async function POST(req: NextRequest): Promise<Response> {
       });
     }
 
+    // Bound request size to reduce abuse
+    if (goal.length > 500) {
+      return new Response(JSON.stringify({ error: 'Goal is too long' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
     const apiKey = process.env.CHATGPT_API;
     if (!apiKey) {
-      console.error('CHATGPT_API environment variable not set');
+      logger.error('CHATGPT_API environment variable not set', undefined, 'AI API');
       return new Response(JSON.stringify({ error: 'AI service not configured' }), {
         status: 500,
         headers: { 'content-type': 'application/json' }
@@ -58,9 +67,9 @@ Rules:
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
-      return new Response(JSON.stringify({ error: 'AI service error', details: errorText }), {
-        status: response.status,
+      logger.error('OpenAI API error', { status: response.status, errorText }, 'AI API');
+      return new Response(JSON.stringify({ error: 'AI service error' }), {
+        status: 502,
         headers: { 'content-type': 'application/json' }
       });
     }
@@ -114,8 +123,8 @@ Rules:
     }
 
     if (verses.length === 0) {
-      console.error('No valid verses parsed from AI response:', content);
-      return new Response(JSON.stringify({ error: 'No valid verses returned', raw: content }), {
+      logger.error('No valid verses parsed from AI response', { content }, 'AI API');
+      return new Response(JSON.stringify({ error: 'No valid verses returned' }), {
         status: 500,
         headers: { 'content-type': 'application/json' }
       });
@@ -127,11 +136,8 @@ Rules:
     });
 
   } catch (err) {
-    console.error('AI API error:', err);
-    return new Response(JSON.stringify({ 
-      error: 'AI service error', 
-      details: err instanceof Error ? err.message : 'Unknown error' 
-    }), {
+    logger.error('AI API error', err, 'AI API');
+    return new Response(JSON.stringify({ error: 'AI service error' }), {
       status: 500,
       headers: { 'content-type': 'application/json' }
     });

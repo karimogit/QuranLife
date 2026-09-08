@@ -252,7 +252,7 @@ export default function SmartGuidance({ goalTitle, goalDescription = '', goalCat
       
       setGuidance(prev => [...prev, ...uniqueAdditionalVerses]);
     } catch (error) {
-      console.error('Failed to load additional guidance:', error);
+      logger.error('Failed to load additional guidance:', error);
     } finally {
       setLoadingMore(false);
     }
