@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -17,8 +18,20 @@ export async function GET(req: NextRequest): Promise<Response> {
       });
     }
 
+    // Validate numeric params and edition format
+    const surahNum = Number(surah);
+    const ayahNum = Number(ayah);
+    if (!Number.isInteger(surahNum) || surahNum < 1 || surahNum > 114 ||
+        !Number.isInteger(ayahNum) || ayahNum < 1 || ayahNum > 286 ||
+        !/^[a-z0-9.]+$/i.test(edition)) {
+      return new Response(JSON.stringify({ error: 'Invalid surah, ayah, or edition' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
     // First fetch the verse metadata to get the global verse number
-    const metaUrl = `https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/${edition}`;
+    const metaUrl = `https://api.alquran.cloud/v1/ayah/${surahNum}:${ayahNum}/${edition}`;
     
     let metaRes;
     try {
@@ -30,17 +43,17 @@ export async function GET(req: NextRequest): Promise<Response> {
         }
       });
     } catch (fetchError) {
-      console.error('Fetch error:', fetchError);
-      return new Response(JSON.stringify({ error: 'Network error fetching metadata', details: fetchError instanceof Error ? fetchError.message : 'Unknown fetch error' }), {
+      logger.error('Fetch error', fetchError, 'Audio API');
+      return new Response(JSON.stringify({ error: 'Network error fetching metadata' }), {
         status: 500,
         headers: { 'content-type': 'application/json' }
       });
     }
 
     if (!metaRes.ok) {
-      console.error('Metadata fetch failed:', metaRes.status, metaRes.statusText);
-      return new Response(JSON.stringify({ error: 'Failed to fetch audio metadata', status: metaRes.status }), {
-        status: metaRes.status,
+      logger.error('Metadata fetch failed', { status: metaRes.status, statusText: metaRes.statusText }, 'Audio API');
+      return new Response(JSON.stringify({ error: 'Failed to fetch audio metadata' }), {
+        status: metaRes.status >= 400 && metaRes.status < 600 ? metaRes.status : 502,
         headers: { 'content-type': 'application/json' }
       });
     }
@@ -49,9 +62,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     try {
       meta = await metaRes.json();
     } catch (jsonError) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('JSON parse error:', jsonError);
-      }
+      logger.error('JSON parse error', jsonError, 'Audio API');
       return new Response(JSON.stringify({ error: 'Invalid JSON response from metadata API' }), {
         status: 500,
         headers: { 'content-type': 'application/json' }
@@ -60,7 +71,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     
     const verseNumber = meta?.data?.number;
     if (!verseNumber) {
-      console.error('No verse number found in metadata');
+      logger.error('No verse number found in metadata', undefined, 'Audio API');
       return new Response(JSON.stringify({ error: 'Verse number not found' }), {
         status: 404,
         headers: { 'content-type': 'application/json' }
@@ -79,17 +90,17 @@ export async function GET(req: NextRequest): Promise<Response> {
         headers: range ? { Range: range } : undefined,
       });
     } catch (audioFetchError) {
-      console.error('Audio fetch error:', audioFetchError);
-      return new Response(JSON.stringify({ error: 'Network error fetching audio file', details: audioFetchError instanceof Error ? audioFetchError.message : 'Unknown audio fetch error' }), {
+      logger.error('Audio fetch error', audioFetchError, 'Audio API');
+      return new Response(JSON.stringify({ error: 'Network error fetching audio file' }), {
         status: 500,
         headers: { 'content-type': 'application/json' }
       });
     }
 
     if (!audioRes.ok) {
-      console.error('Audio fetch failed:', audioRes.status, audioRes.statusText);
-      return new Response(JSON.stringify({ error: 'Failed to fetch audio file', status: audioRes.status }), {
-        status: audioRes.status,
+      logger.error('Audio fetch failed', { status: audioRes.status, statusText: audioRes.statusText }, 'Audio API');
+      return new Response(JSON.stringify({ error: 'Failed to fetch audio file' }), {
+        status: audioRes.status >= 400 && audioRes.status < 600 ? audioRes.status : 502,
         headers: { 'content-type': 'application/json' }
       });
     }
@@ -120,10 +131,10 @@ export async function GET(req: NextRequest): Promise<Response> {
       headers
     });
   } catch (err) {
-    console.error('Audio API error:', err);
-    return new Response(JSON.stringify({ error: 'Audio proxy error', details: err instanceof Error ? err.message : 'Unknown error' }), {
+    logger.error('Audio API error', err, 'Audio API');
+    return new Response(JSON.stringify({ error: 'Audio proxy error' }), {
       status: 500,
       headers: { 'content-type': 'application/json' }
     });
   }
-} 
+}

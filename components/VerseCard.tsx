@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import FullscreenVerseModal from './FullscreenVerseModal';
+import { logger } from '@/lib/logger'
 
 interface Verse {
   id: number;
@@ -93,7 +94,7 @@ export default function VerseCard({ verse }: VerseCardProps) {
         setAudioError(null); // Clear any previous errors
       }
     } catch (error) {
-      console.error('Error playing audio:', error);
+      logger.error('Error playing audio:', error);
       setIsLoading(false);
       setIsPlaying(false);
       
@@ -132,10 +133,10 @@ export default function VerseCard({ verse }: VerseCardProps) {
 
   const handleAudioError = () => {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Audio failed to load');
-      console.error('Audio URL:', audioUrl);
-      console.error('Audio readyState:', audioRef.current?.readyState);
-      console.error('Audio error:', audioRef.current?.error);
+      logger.error('Audio failed to load');
+      logger.error('Audio URL:', audioUrl);
+      logger.error('Audio readyState:', audioRef.current?.readyState);
+      logger.error('Audio error:', audioRef.current?.error);
     }
     
     setIsLoading(false);

@@ -4,6 +4,7 @@
  * Updated to handle CORS issues with audio URLs
  */
 
+import { logger } from './logger';
 export interface Verse {
   number: number;
   text: string;
@@ -72,7 +73,7 @@ class QuranAPI {
       const data = await response.json();
       return data.data || [];
     } catch (error) {
-      console.error('Error fetching audio editions:', error);
+      logger.error('Error fetching audio editions:', error);
       return [];
     }
   }
@@ -124,7 +125,7 @@ class QuranAPI {
         verses
       };
     } catch (error) {
-      console.error('Error fetching Surah:', error);
+      logger.error('Error fetching Surah:', error);
       throw error;
     }
   }
@@ -138,7 +139,7 @@ class QuranAPI {
       const proxied = `/api/audio?surah=${encodeURIComponent(String(surahNumber))}&ayah=${encodeURIComponent(String(verseNumber))}&edition=${encodeURIComponent(this.audioEdition)}`;
       return proxied;
     } catch (error) {
-      console.error('Error building verse audio URL:', error);
+      logger.error('Error building verse audio URL:', error);
       return null;
     }
   }
@@ -185,7 +186,7 @@ class QuranAPI {
         surahAyahCount: arabicVerse.surah?.numberOfAyahs
       };
     } catch (error) {
-      console.error('Error fetching verse:', error);
+      logger.error('Error fetching verse:', error);
       throw error;
     }
   }
@@ -229,7 +230,7 @@ class QuranAPI {
         context: context.description
       };
     } catch (error) {
-      console.error('Error getting random verse:', error);
+      logger.error('Error getting random verse:', error);
       throw error;
     }
   }
@@ -269,7 +270,7 @@ class QuranAPI {
         surahAyahCount: match.surah?.numberOfAyahs
       }));
     } catch (error) {
-      console.error('Error searching verses:', error);
+      logger.error('Error searching verses:', error);
       return [];
     }
   }
@@ -323,7 +324,7 @@ class QuranAPI {
         numberOfAyahs: surah.numberOfAyahs
       }));
     } catch (error) {
-      console.error('Error fetching Surahs list:', error);
+      logger.error('Error fetching Surahs list:', error);
       throw error;
     }
   }
